@@ -8,7 +8,7 @@ djangorestframework==3.16.1
 psycopg2-binary==2.9.9
 
 # JWT Authentication
-djangorestframework-simplejwt==6.1.0
+djangorestframework-simplejwt==5.5.1
 
 # Environment variables
 python-dotenv==1.0.0
