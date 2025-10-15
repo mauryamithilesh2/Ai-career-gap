@@ -1,5 +1,26 @@
+# Core Django
 Django==4.2
-djangorestframework
-psycopg2-binary
-djangorestframework-simplejwt
-python-dotenv
+
+# Django REST Framework
+djangorestframework==3.20.1
+
+# PostgreSQL Adapter
+psycopg2-binary==2.9.9
+
+# JWT Authentication
+djangorestframework-simplejwt==6.1.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# WSGI server for production
+gunicorn==21.2.0
+
+# Serve static files efficiently
+whitenoise==6.5.0
+
+# CORS headers (if frontend hosted separately)
+django-cors-headers==4.3.0
+
+# Optional: for easier API testing and pagination
+django-filter==23.2
