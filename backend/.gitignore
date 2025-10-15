@@ -1,0 +1,35 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.env
+*.log
+
+# Django
+db.sqlite3            # Ignore default SQLite (you use PostgreSQL)
+/media                # Uploaded files
+/staticfiles
+/static
+*.pot
+*.mo
+
+# VS Code
+.vscode/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Mac / Linux
+.DS_Store
+
+# PostgreSQL (ignore local dump files if not needed)
+*.dump
+*.sql  # optional, include only if you don't need local dumps
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/
