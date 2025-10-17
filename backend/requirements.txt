@@ -24,3 +24,6 @@ django-cors-headers==4.3.0
 
 # Optional: for easier API testing and pagination
 django-filter==23.2
+dj-database-url
+
+
