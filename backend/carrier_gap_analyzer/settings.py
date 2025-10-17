@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key-for-dev")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "TRUE").upper() == "TRUE"  # fallback to True if env missing
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["ai-career-gap.onrender.com", "*.onrender.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -67,7 +67,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React development server
     "http://127.0.0.1:3000",  # React development server
-    "https://your-frontend-domain.com",  # ✅ Change this to your production frontend URL
+    "https://ai-career-gap-frontend.onrender.com",  # Production frontend URL
+    "https://ai_career_gap-frontend.com",  # Alternative production frontend URL
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -96,18 +97,7 @@ WSGI_APPLICATION = "carrier_gap_analyzer.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        #"ENGINE": "django.db.backends.sqlite3",
-        # "NAME": BASE_DIR / "db.sqlite3",
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "carrier_gap_db"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "mithi123"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
-    }
-}
+# Database configuration will be set below based on environment
 
 
 # Password validation
@@ -179,3 +169,19 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
+
+
+# Production database configuration
+import dj_database_url
+if os.getenv('DATABASE_URL'):
+    DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+else:
+    # Fallback for development/local testing
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME", "carrier_gap_db"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "mithi123"),
+        "HOST": os.getenv("DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    }
