@@ -1,2 +1,4 @@
-web: gunicorn carrier_gap_analyzer.wsgi
+
+web: gunicorn carrier_gap_analyzer.wsgi:application
+
 web: gunicorn carrier_gap_analyzer.wsgi --log-file -
