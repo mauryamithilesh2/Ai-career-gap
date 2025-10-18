@@ -140,7 +140,11 @@ class LoginView(APIView):
                 }
             })
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Return detailed error information for debugging
+        return Response({
+            'errors': serializer.errors,
+            'data_received': request.data
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):

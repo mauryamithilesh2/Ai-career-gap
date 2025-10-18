@@ -16,17 +16,23 @@ function Login() {
         setError('');
 
         try {
+            console.log('Attempting login with:', { username, password: '***' });
             const res = await authAPI.login({ username, password });
+            console.log('Login response:', res.data);
+            
             localStorage.setItem('access_token', res.data.tokens.access);
             localStorage.setItem('refresh_token', res.data.tokens.refresh);
             localStorage.setItem('user', JSON.stringify(res.data.user));           
             navigate('/dashboard');
         } catch (err) {
-            // setError(err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password. Please try again.');
+            console.error('Login error:', err);
+            console.error('Error response:', err.response?.data);
+            
             const backendError =
             err.response?.data?.detail ||
             err.response?.data?.message ||
             err.response?.data?.non_field_errors?.[0] ||
+            err.response?.data?.errors ||
             'Login failed. Please check your credentials.';
 
             setError(backendError);
