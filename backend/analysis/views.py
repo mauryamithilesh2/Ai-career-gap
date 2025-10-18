@@ -82,7 +82,7 @@ class JobDescriptionViewSet(viewsets.ModelViewSet):
 
 from django.http import JsonResponse
 @api_view(['GET'])
-def home(self,request):
+def home(request):
     return JsonResponse({
         'message': 'Welcome to Career Gap Analyzer API!',
         'version': '1.0.0',
