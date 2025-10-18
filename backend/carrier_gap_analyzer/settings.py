@@ -97,7 +97,8 @@ WSGI_APPLICATION = "carrier_gap_analyzer.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Database configuration will be set below based on environment
+# Initialize DATABASES dictionary
+DATABASES = {}
 
 
 # Password validation
