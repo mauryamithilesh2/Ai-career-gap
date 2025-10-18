@@ -67,7 +67,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React development server
     "http://127.0.0.1:3000",  # React development server
-    "https://ai-career-gap-frontend.onrender.com",  # Production frontend URL
+    "https://ai-career-gap.vercel.app",  # Production frontend URL
     "https://ai_career_gap-frontend.com",  # Alternative production frontend URL
 ]
 
