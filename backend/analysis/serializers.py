@@ -70,16 +70,20 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-        )
-        # Create user profile
-        UserProfile.objects.create(user=user)
-        return user
+        try:
+            user = User.objects.create_user(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password'],
+                first_name=validated_data.get('first_name', ''),
+                last_name=validated_data.get('last_name', ''),
+            )
+            # Create user profile
+            UserProfile.objects.create(user=user)
+            return user
+        except Exception as e:
+            print(f"Error creating user: {e}")
+            raise serializers.ValidationError(f"Error creating user: {str(e)}")
 
 
 class LoginSerializer(serializers.Serializer):
