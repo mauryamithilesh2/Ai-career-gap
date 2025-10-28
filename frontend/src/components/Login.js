@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../api/api";
 import "./Login.css";
 
@@ -91,7 +91,9 @@ function Login() {
                             <span className="checkmark"></span>
                             Remember me
                         </label>
-                        <a href="#" className="forgot-password">Forgot password?</a>
+                        <button type="button" className="forgot-password" onClick={() => navigate('/forgot-password')}>
+                            Forgot password?
+                        </button>
                     </div>
 
                     <button
@@ -116,7 +118,7 @@ function Login() {
                 <div className="login-footer">
                     <p className="signup-text">
                         Don't have an account? 
-                        <a href="/register" className="signup-link"> Create one here</a>
+                        <Link to="/register" className="signup-link"> Create one here</Link>
                     </p>
                 </div>
             </div>

@@ -74,7 +74,7 @@ function UploadResume() {
         formData.append('file', file);
 
         try {
-            const res = await resumeAPI.upload(formData);
+            await resumeAPI.upload(formData);
             setSuccess(true);
             setTimeout(() => {
                 navigate('/dashboard');

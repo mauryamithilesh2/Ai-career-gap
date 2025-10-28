@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../api/api";
 import "./Register.css";
 
@@ -54,7 +54,7 @@ function Register() {
         setLoading(true);
 
         try {
-            const res = await authAPI.register({
+            await authAPI.register({
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
@@ -170,7 +170,7 @@ function Register() {
                         <label className="checkbox-label">
                             <input type="checkbox" required />
                             <span className="checkmark"></span>
-                            I agree to the <a href="#" className="terms-link">Terms of Service</a> and <a href="#" className="terms-link">Privacy Policy</a>
+                            I agree to the <Link to="/terms" className="terms-link">Terms of Service</Link> and <Link to="/privacy" className="terms-link">Privacy Policy</Link>
                         </label>
                     </div>
 
@@ -196,7 +196,7 @@ function Register() {
                 <div className="register-footer">
                     <p className="login-text">
                         Already have an account? 
-                        <a href="/login" className="login-link"> Sign in here</a>
+                        <Link to="/login" className="login-link"> Sign in here</Link>
                     </p>
                 </div>
             </div>
