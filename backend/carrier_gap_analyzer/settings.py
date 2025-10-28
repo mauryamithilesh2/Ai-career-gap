@@ -111,6 +111,25 @@ WSGI_APPLICATION = "carrier_gap_analyzer.wsgi.application"
 # Initialize DATABASES dictionary
 DATABASES = {}
 
+# Production database configuration
+import dj_database_url
+if os.getenv("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
+else:
+    # Fallback for development/local testing
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME", "carrier_gap_db"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "mithi123"),
+        "HOST": os.getenv("DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -182,25 +201,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-
-# Production database configuration
-import dj_database_url
-if os.getenv("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
-    )
-else:
-    # Fallback for development/local testing
-    DATABASES["default"] = {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "carrier_gap_db"),
-        "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "mithi123"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
-        "PORT": os.getenv("DB_PORT", "5432"),
-    }
 
 
 
