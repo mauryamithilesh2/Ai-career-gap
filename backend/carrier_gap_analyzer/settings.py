@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -56,7 +57,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 
 ]
 
@@ -70,11 +70,18 @@ CORS_ALLOWED_ORIGINS = [
     "https://ai-career-gap.vercel.app",  # Production frontend URL
     "https://ai-career-gap-frontend.onrender.com",  # Alternative production frontend URL
 ]
+# Allow common Vercel/Render subdomains without hardcoding exact preview URLs
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\\.vercel\\.app$",
+    r"^https://.*\\.onrender\\.com$",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "https://ai-career-gap.vercel.app",
     "https://ai-career-gap.onrender.com",
+    "https://*.vercel.app",
+    "https://*.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -169,6 +176,10 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if DEBUG:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+    
+# Ensure optimal static serving in production
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files
 MEDIA_URL = '/media/'
@@ -208,3 +219,6 @@ SIMPLE_JWT = {
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+# Trust X-Forwarded-Proto for HTTPS detection behind Render's proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
