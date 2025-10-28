@@ -1,77 +1,78 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { dashboardAPI } from '../api/api';
 
 function DashboardHome() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [statsData, setStatsData] = useState({
+    total_resumes: 0,
+    total_jobs: 0,
+    total_analyses: 0,
+    match_accuracy: 0,
+    avg_analysis_time: 0,
+    recent_activities: []
+  });
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser) setUser(storedUser);
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchStats() {
+      try {
+        setLoading(true);
+        const res = await dashboardAPI.getStats();
+        if (!isMounted) return;
+        setStatsData(res.data);
+      } catch (e) {
+        if (!isMounted) return;
+        setError('Failed to load dashboard data.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchStats();
+    return () => { isMounted = false; };
+  }, []);
   const stats = [
     {
       icon: '📄',
-      value: '12',
+      value: String(statsData.total_resumes),
       label: 'Resumes Uploaded',
-      change: '+2 this week',
+      change: '',
       changeType: 'positive',
       color: 'bg-blue-500'
     },
     {
       icon: '💼',
-      value: '8',
-      label: 'Jobs Analyzed',
-      change: '+1 today',
+      value: String(statsData.total_jobs),
+      label: 'Jobs Uploaded',
+      change: '',
       changeType: 'positive',
       color: 'bg-green-500'
     },
     {
       icon: '📊',
-      value: '95%',
+      value: `${Number(statsData.match_accuracy).toFixed(0)}%`,
       label: 'Match Accuracy',
-      change: '+5% this month',
+      change: '',
       changeType: 'positive',
       color: 'bg-purple-500'
     },
     {
       icon: '⏱️',
-      value: '2.3s',
+      value: `${Number(statsData.avg_analysis_time).toFixed(1)}s`,
       label: 'Avg Analysis Time',
-      change: '-0.5s faster',
+      change: '',
       changeType: 'positive',
       color: 'bg-orange-500'
     }
   ];
 
-  const recentActivities = [
-    {
-      type: 'resume',
-      title: 'Software Engineer Resume',
-      time: '2 hours ago',
-      status: 'completed',
-      icon: '📄'
-    },
-    {
-      type: 'job',
-      title: 'Frontend Developer Position',
-      time: '4 hours ago',
-      status: 'analyzing',
-      icon: '💼'
-    },
-    {
-      type: 'analysis',
-      title: 'Career Gap Report Generated',
-      time: '1 day ago',
-      status: 'completed',
-      icon: '📊'
-    },
-    {
-      type: 'resume',
-      title: 'Data Scientist Resume',
-      time: '2 days ago',
-      status: 'completed',
-      icon: '📄'
-    }
-  ];
+  const recentActivities = statsData.recent_activities || [];
 
   const quickActions = [
     {
@@ -116,18 +117,30 @@ function DashboardHome() {
         </p>
       </div>
 
+      {error && (
+        <div className="p-3 mb-4 rounded bg-red-50 text-red-700 text-sm">{error}</div>
+      )}
+
       {/* Stats Grid */}
       <div className="stats-grid mb-8">
-        {stats.map((stat, index) => (
+        {(loading ? [0,1,2,3] : stats).map((stat, index) => (
           <div key={index} className="stat-card">
-            <div className={`stat-icon ${stat.color} text-white`}>
-              {stat.icon}
-            </div>
-            <h3 className="stat-value">{stat.value}</h3>
-            <p className="stat-label">{stat.label}</p>
-            <p className={`stat-change ${stat.changeType}`}>
-              {stat.change}
-            </p>
+            {loading ? (
+              <div className="animate-pulse h-20 w-full" />
+            ) : (
+              <>
+                <div className={`stat-icon ${stat.color} text-white`}>
+                  {stat.icon}
+                </div>
+                <h3 className="stat-value">{stat.value}</h3>
+                <p className="stat-label">{stat.label}</p>
+                {stat.change && (
+                  <p className={`stat-change ${stat.changeType}`}>
+                    {stat.change}
+                  </p>
+                )}
+              </>
+            )}
           </div>
         ))}
       </div>
@@ -161,20 +174,26 @@ function DashboardHome() {
             <p className="card-subtitle">Your latest actions and results</p>
           </div>
           <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
+            {(loading ? Array.from({ length: 4 }) : recentActivities).map((activity, index) => (
               <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="text-2xl">{activity.icon}</div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{activity.title}</h4>
-                  <p className="text-sm text-gray-500">{activity.time}</p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  activity.status === 'completed' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {activity.status}
-                </span>
+                {loading ? (
+                  <div className="h-10 w-full animate-pulse bg-gray-100 rounded" />
+                ) : (
+                  <>
+                    <div className="text-2xl">{activity.icon}</div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{activity.title}</h4>
+                      <p className="text-sm text-gray-500">{new Date(activity.time).toLocaleString()}</p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      activity.status === 'completed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {activity.status}
+                    </span>
+                  </>
+                )}
               </div>
             ))}
           </div>
