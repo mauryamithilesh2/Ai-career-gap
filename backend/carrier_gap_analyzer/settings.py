@@ -72,6 +72,17 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://ai-career-gap.vercel.app",
+    "https://ai-career-gap-frontend.onrender.com",
+]
+
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-csrftoken",
+]
+
 
 # Frontend URL for password reset links
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
