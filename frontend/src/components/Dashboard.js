@@ -89,7 +89,7 @@ const [user, setUser] = useState(null);
           <div className="user-info">
             <div className="user-avatar">👤</div>
             <div className="user-details">
-              <div className="user-name">mithi</div>
+              <div className="user-name">{user?.first_name || user?.username || 'User'}</div>
               <div className="user-role">Career Analyst</div>
             </div>
           </div>

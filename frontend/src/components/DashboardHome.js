@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function DashboardHome() {
-
-
-
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser) setUser(storedUser);
+  }, []);
   const stats = [
     {
       icon: '📄',
@@ -107,7 +109,7 @@ function DashboardHome() {
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back,  👋
+          Welcome back, {user?.first_name || user?.username || 'User'} 👋
         </h1>
         <p className="text-gray-600">
           Here's what's happening with your career analysis today.
