@@ -185,8 +185,12 @@ SIMPLE_JWT = {
 
 # Production database configuration
 import dj_database_url
-if os.getenv('DATABASE_URL'):
-    DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+if os.getenv("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 else:
     # Fallback for development/local testing
     DATABASES["default"] = {
