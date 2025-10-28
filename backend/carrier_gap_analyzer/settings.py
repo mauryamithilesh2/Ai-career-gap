@@ -74,7 +74,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "https://ai-career-gap.vercel.app",
-    "https://ai-career-gap-frontend.onrender.com",
+    "https://ai-career-gap.onrender.com",
 ]
 
 CORS_ALLOW_HEADERS = [
