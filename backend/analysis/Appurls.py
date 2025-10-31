@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ResumeViewSet, JobDescriptionViewSet, home, RegisterView, ResumeUploadView,
     LoginView, LogoutView, PasswordResetRequestView, PasswordResetConfirmView,
-    ChangePasswordView, UserProfileView, DashboardStatsView, JobUploadView
+    ChangePasswordView, UserProfileView, DashboardStatsView, JobUploadView,analyze_resume_job
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -41,6 +41,9 @@ urlpatterns = [
     # JWT token endpoints (keeping for compatibility)
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    #analysis result
+    path('api/analyze/',analyze_resume_job,name='analyze_gap')
 ]
 
 

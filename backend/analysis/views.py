@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics, status, permissions
-from rest_framework.decorators import action,api_view
+from rest_framework.decorators import action,api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -341,3 +341,24 @@ class JobUploadView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+
+
+
+
+#it is for analysis of skills
+
+from .nlp_module.job_resume_analyzer import analyze_gap
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def analyze_resume_job(request):
+    resume_text = request.data.get('resume_text','')
+    job_text = request.data.get('job_text','')
+
+
+    if not resume_text or not job_text:
+        return Response({"error":"Both resume_text and job_text are required."})
+    
+    result = analyze_gap(resume_text,job_text)
+    return Response(result)

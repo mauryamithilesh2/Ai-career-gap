@@ -716,7 +716,7 @@
 
 /* Instructions Styles */
 .instructions {
-  space-y: 1.5rem;
+  space-y : 1.5rem;
 }
 
 .instruction-item {
