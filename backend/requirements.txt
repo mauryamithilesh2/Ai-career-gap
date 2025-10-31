@@ -1,45 +1,27 @@
-# Core Django
-Django==5.2.7
-
-# Django REST Framework
+# --- Core Django ---
+Django==5.0.3
 djangorestframework==3.16.1
+psycopg2-binary==2.9.9
 
-# PostgreSQL Adapter (Python 3.13 compatible)
-psycopg[binary]==3.2.10
-
-# JWT Authentication
+# --- Auth & Config ---
 djangorestframework-simplejwt==5.5.1
+python-dotenv==1.0.1
 
-# Environment variables
-python-dotenv==1.1.1
-
-# WSGI server for production
+# --- Deployment ---
 gunicorn==21.2.0
-
-# Serve static files efficiently
 whitenoise==6.5.0
-
-# CORS headers (if frontend hosted separately)
-django-cors-headers==4.9.0
-
-# Database URL parsing
+django-cors-headers==4.3.1
 dj-database-url==2.1.0
-
-# Optional: for easier API testing and pagination
 django-filter==23.2
 
-
-
-# --- NLP & Machine Learning ---
-
-spacy==3.7.2
-
-
-
+# --- NLP & ML ---
+spacy==3.7.4
+thinc==8.2.2
+blis==0.7.10
 numpy==1.26.4
 pydantic==2.12.3
-thinc==8.2.5
 
-# --- Utility Libraries ---
+# --- Utilities ---
 requests==2.32.3
 tqdm==4.67.1
+
