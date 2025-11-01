@@ -75,7 +75,7 @@ export const dashboardAPI = {
 
 // Resume API endpoints
 export const resumeAPI = {
-    upload: (formData) => API.post('resumes/upload/', formData, {
+    upload: (formData) => API.post('resumes/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
     list: () => API.get('resumes/'),
@@ -85,15 +85,15 @@ export const resumeAPI = {
 };
 
 // Job API endpoints
-export const resumeAPI = {
-    upload: (formData) => API.post('resumes/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-    }),
-    list: () => API.get('resumes/'),
-    get: (id) => API.get(`resumes/${id}/`),
-    analyze: (id) => API.post(`resumes/${id}/analyze/`),
-    delete: (id) => API.delete(`resumes/${id}/`),
-};
+export const jobAPI = { 
+    upload: (data) => API.post('jobs/', data),
+    list: () => API.get('jobs/'), 
+    get: (id) => API.get(jobs/${id}/), 
+    analyze: (id) => API.post(jobs/${id}/analyze/),
+    delete: (id) => API.delete(jobs/${id}/),
+    };
+
+
 // Analysis API endpoints
 export const analyzeAPI = {
     analyze: (data) => API.post('analyze/', data),
