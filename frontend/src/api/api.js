@@ -86,7 +86,7 @@ export const resumeAPI = {
 
 // Job API endpoints
 export const jobAPI = {
-    upload: (data) => API.post('jobs/upload/', data),
+    upload: (data) => API.post('jobs/', data),
     list: () => API.get('jobs/'),
     get: (id) => API.get(`jobs/${id}/`),
     analyze: (id) => API.post(`jobs/${id}/analyze/`),
