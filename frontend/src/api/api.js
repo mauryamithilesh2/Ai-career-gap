@@ -88,10 +88,10 @@ export const resumeAPI = {
 export const jobAPI = { 
     upload: (data) => API.post('jobs/', data),
     list: () => API.get('jobs/'), 
-    get: (id) => API.get(jobs/${id}/), 
-    analyze: (id) => API.post(jobs/${id}/analyze/),
-    delete: (id) => API.delete(jobs/${id}/),
-    };
+    get: (id) => API.get(`jobs/${id}/`), 
+    analyze: (id) => API.post(`jobs/${id}/analyze/`),
+    delete: (id) => API.delete(`jobs/${id}/`),
+};
 
 
 // Analysis API endpoints
