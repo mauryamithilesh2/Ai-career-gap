@@ -1,153 +1,224 @@
-import React, { useState } from "react";
+// src/pages/Analyze.js
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Dashboard from './Dashboard';
+import { analyzeAPI, resumeAPI, jobAPI } from '../api/api';
+import './Profile.css'; // reuse same clean styling
 
-function Analysis() {
-  const [resumeText, setResumeText] = useState("");
-  const [jobText, setJobText] = useState("");
-  const [result, setResult] = useState(null);
+function Analyze() {
+  const [resumes, setResumes] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [selectedResume, setSelectedResume] = useState('');
+  const [selectedJob, setSelectedJob] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  const handleAnalyze = async () => {
-    if (!resumeText || !jobText) {
-      setError("Please fill both fields before analyzing.");
+  // 🔹 Fetch uploaded resumes and jobs
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [resumeRes, jobRes] = await Promise.all([
+          resumeAPI.list(),
+          jobAPI.list(),
+        ]);
+        setResumes(resumeRes.data);
+        setJobs(jobRes.data);
+      } catch (err) {
+        console.error('Data load error:', err);
+        setError('⚠️ Unable to load resume or job data.');
+      }
+    }
+    fetchData();
+  }, []);
+
+  // 🧠 Perform resume-job analysis
+  const handleAnalyze = async (e) => {
+    e.preventDefault();
+
+    if (!selectedResume || !selectedJob) {
+      setError('Please select both a Resume and a Job Description.');
       return;
     }
 
-    setError("");
     setLoading(true);
+    setError('');
+    setSuccess(false);
     setResult(null);
 
     try {
-      const token = localStorage.getItem("token");
-      const BASE_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${BASE_URL}/api/analyze/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify({ resume_text: resumeText, job_text: jobText }),
+      const res = await analyzeAPI.analyze({
+        resume_id: selectedResume,
+        job_id: selectedJob,
       });
-
-      if (!response.ok) throw new Error("Unauthorized or failed request.");
-
-      const data = await response.json();
-      setResult(data);
+      setResult(res.data);
+      setSuccess(true);
     } catch (err) {
-      setError(err.message);
+      console.error('Analysis error:', err);
+      setError(err.response?.data?.error || 'Analysis failed. Try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gray-50 text-gray-900">
-      <h2 className="text-3xl font-bold text-center mb-6">Resume & Job Analysis</h2>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {/* Resume Input */}
-        <div>
-          <h3 className="font-semibold mb-2">Resume Text</h3>
-          <textarea
-            className="w-full h-48 p-3 border rounded-md focus:outline-blue-500"
-            placeholder="Paste your resume text here..."
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-          />
+    <Dashboard>
+      <div className="fade-in">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">📊 Resume Analysis</h1>
+          <p className="text-gray-600">
+            Compare your uploaded resume with a job description to find your strengths and gaps.
+          </p>
         </div>
 
-        {/* Job Description Input */}
-        <div>
-          <h3 className="font-semibold mb-2">Job Description</h3>
-          <textarea
-            className="w-full h-48 p-3 border rounded-md focus:outline-blue-500"
-            placeholder="Paste job description here..."
-            value={jobText}
-            onChange={(e) => setJobText(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="text-center">
-        <button
-          onClick={handleAnalyze}
-          disabled={loading}
-          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-        >
-          {loading ? "Analyzing..." : "Analyze"}
-        </button>
-      </div>
-
-      {error && (
-        <div className="mt-4 text-center text-red-500 font-semibold">
-          {error}
-        </div>
-      )}
-
-      {/* Result Section */}
-      {result && (
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-2xl font-bold text-blue-600 mb-4 text-center">Analysis Result</h3>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Skills Section */}
-            <div>
-              <h4 className="text-lg font-semibold mb-2">Resume Skills</h4>
-              <ul className="list-disc ml-6 text-gray-700">
-                {result.resume_skills?.map((skill, i) => (
-                  <li key={i}>{skill}</li>
-                ))}
-              </ul>
-
-              <h4 className="text-lg font-semibold mt-4 mb-2">Job Skills</h4>
-              <ul className="list-disc ml-6 text-gray-700">
-                {result.job_skills?.map((skill, i) => (
-                  <li key={i}>{skill}</li>
-                ))}
-              </ul>
-
-              <h4 className="text-lg font-semibold mt-4 mb-2">Missing Skills</h4>
-              {result.missing_skills?.length > 0 ? (
-                <ul className="list-disc ml-6 text-red-600">
-                  {result.missing_skills.map((skill, i) => (
-                    <li key={i}>{skill}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-green-600">No missing skills 🎯</p>
-              )}
-            </div>
-
-            {/* Summary Section */}
-            <div>
-              <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                <h4 className="text-lg font-semibold mb-2">Match Percentage</h4>
-                <div className="text-3xl font-bold text-blue-600">
-                  {result.match_percent}%
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Section */}
+          <div className="lg:col-span-2">
+            <div className="card">
+              <div className="card-header flex items-center justify-between">
+                <div>
+                  <h2 className="card-title">🔍 Analyze Resume & Job</h2>
+                  <p className="card-subtitle">Select resume and job to start analysis</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <h4 className="text-lg font-semibold mb-2">Recommendations</h4>
-                <ul className="list-disc ml-6 text-gray-700">
-                  {result.recommendations?.map((rec, i) => (
-                    <li key={i}>{rec}</li>
-                  ))}
-                </ul>
-              </div>
+              {/* Alerts */}
+              {error && (
+                <div className="error-message">
+                  <span className="error-icon">⚠️</span>
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="success-message">
+                  <span className="success-icon">✅</span>
+                  Analysis completed successfully!
+                </div>
+              )}
 
-              <div className="bg-green-50 rounded-lg p-4">
-                <h4 className="text-lg font-semibold mb-2">Resume Overview</h4>
-                <p>Experience: {result.resume_overview?.has_experirnce ? "✅ Yes" : "❌ No"}</p>
-                <p>Education: {result.resume_overview?.has_education ? "✅ Yes" : "❌ No"}</p>
-                <p>Years of Experience: {result.resume_overview?.year_experience}</p>
+              <form onSubmit={handleAnalyze} className="space-y-6">
+                {/* Resume Select */}
+                <div className="form-group">
+                  <label className="form-label">Select Resume</label>
+                  <select
+                    className="form-input"
+                    value={selectedResume}
+                    onChange={(e) => setSelectedResume(e.target.value)}
+                  >
+                    <option value="">-- Choose a Resume --</option>
+                    {resumes.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.file.split('/').pop()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Job Select */}
+                <div className="form-group">
+                  <label className="form-label">Select Job Description</label>
+                  <select
+                    className="form-input"
+                    value={selectedJob}
+                    onChange={(e) => setSelectedJob(e.target.value)}
+                  >
+                    <option value="">-- Choose a Job --</option>
+                    {jobs.map((j) => (
+                      <option key={j.id} value={j.id}>
+                        {j.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`btn btn-primary w-full ${loading ? 'loading' : ''}`}
+                >
+                  {loading ? 'Analyzing...' : '🚀 Start Analysis'}
+                </button>
+              </form>
+
+              {/* Result Section */}
+              {result && (
+                <div className="mt-8 bg-gray-50 border border-gray-200 p-5 rounded-xl shadow-inner">
+                  <h3 className="text-xl font-semibold text-green-700 mb-3 text-center">
+                    Analysis Result
+                  </h3>
+                  <p className="text-gray-800 mb-2">
+                    <strong>Match Score:</strong> {result.match_score || 0}%
+                  </p>
+                  <p className="text-gray-800 mb-2">
+                    <strong>Strengths:</strong>{' '}
+                    {(result.strengths || []).join(', ') || 'None listed'}
+                  </p>
+                  <p className="text-gray-800">
+                    <strong>Missing Skills:</strong>{' '}
+                    {(result.missing_skills || []).join(', ') || 'No major gaps! 🎯'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar Tips */}
+          <div className="space-y-6">
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">💡 Analysis Tips</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="tip-item">
+                  <div className="tip-icon">📄</div>
+                  <div className="tip-content">
+                    <h4>Keep Resume Updated</h4>
+                    <p>Upload your latest version for better accuracy.</p>
+                  </div>
+                </div>
+                <div className="tip-item">
+                  <div className="tip-icon">🏢</div>
+                  <div className="tip-content">
+                    <h4>Select Relevant Job</h4>
+                    <p>Pick the job most aligned with your career goals.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">⚡ Quick Actions</h3>
+              </div>
+              <div className="space-y-2">
+                <button
+                  className="btn btn-secondary w-full"
+                  onClick={() => navigate('/upload-job')}
+                >
+                  📤 Upload Job
+                </button>
+                <button
+                  className="btn btn-secondary w-full"
+                  onClick={() => navigate('/upload-resume')}
+                >
+                  📎 Upload Resume
+                </button>
+                <button
+                  className="btn btn-secondary w-full"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  🏠 Return to Dashboard
+                </button>
               </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    </Dashboard>
   );
 }
 
-export default Analysis;
+export default Analyze;

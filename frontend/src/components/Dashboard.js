@@ -61,8 +61,8 @@ const [user, setUser] = useState(null);
       <div className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <span className="logo-icon">🎯</span>
-            <span className="logo-text">CareerGap</span>
+            <span className="logo-icon"></span>
+            <span className="logo-text ">CareerGap</span>
           </div>
           <button 
             className="sidebar-toggle"

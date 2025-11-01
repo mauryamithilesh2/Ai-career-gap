@@ -9,6 +9,8 @@ function UploadResume() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [dragActive, setDragActive] = useState(false);
+    const [analyzing, setAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
     const navigate = useNavigate();
 
     const handleDrag = (e) => {
@@ -25,7 +27,7 @@ function UploadResume() {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-        
+
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const droppedFile = e.dataTransfer.files[0];
             if (validateFile(droppedFile)) {
@@ -76,13 +78,23 @@ function UploadResume() {
         try {
             await resumeAPI.upload(formData);
             setSuccess(true);
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 2000);
         } catch (err) {
             setError(err.response?.data?.detail || err.response?.data?.message || 'Upload failed. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAnalyze = async () => {
+        setError('');
+        setAnalyzing(true);
+        try {
+            const response = await resumeAPI.analyze();  // connect to backend stats or analyze API
+            setAnalysisResult(response.data);
+        } catch (err) {
+            setError("Error analyzing resume. Please try again.");
+        } finally {
+            setAnalyzing(false);
         }
     };
 
@@ -91,23 +103,56 @@ function UploadResume() {
         setError('');
     };
 
+    // ------------------------------
+    // SUCCESS UI AFTER UPLOAD
+    // ------------------------------
     if (success) {
         return (
             <Dashboard>
-                <div className="fade-in">
-                    <div className="card">
-                        <div className="success-message text-center">
-                            <div className="success-icon text-6xl mb-4">✅</div>
-                            <h2 className="text-2xl font-bold text-green-600 mb-2">Resume Uploaded Successfully!</h2>
-                            <p className="text-gray-600">Your resume has been processed and is ready for analysis.</p>
-                        </div>
+                <div className="fade-in text-center">
+                    <div className="card p-6">
+                        <div className="success-icon text-6xl mb-4">✅</div>
+                        <h2 className="text-2xl font-bold text-green-600 mb-2">
+                            Resume Uploaded Successfully!
+                        </h2>
+                        <p className="text-gray-600 mb-6">
+                            Your resume has been uploaded and is ready for analysis.
+                        </p>
+
+                        {!analysisResult ? (
+                            <button
+                                onClick={handleAnalyze}
+                                disabled={analyzing}
+                                className="btn btn-primary px-6 py-2 rounded-lg font-semibold"
+                            >
+                                {analyzing ? "Analyzing..." : "Analyze Resume"}
+                            </button>
+                        ) : (
+                            <div className="analysis-result mt-6 text-left bg-white p-6 rounded-lg shadow">
+                                <h3 className="text-xl font-bold mb-2">📊 Analysis Result</h3>
+                                <p><strong>Match Accuracy:</strong> {analysisResult.match_accuracy || "N/A"}%</p>
+                                <p><strong>Total Resumes:</strong> {analysisResult.total_resumes || 0}</p>
+                                <p><strong>Total Jobs:</strong> {analysisResult.total_jobs || 0}</p>
+                                <p><strong>Average Analysis Time:</strong> {analysisResult.avg_analysis_time || "N/A"} sec</p>
+
+                                <button
+                                    onClick={() => navigate('/dashboard')}
+                                    className="btn btn-secondary mt-4"
+                                >
+                                    Return to Dashboard
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Dashboard>
         );
     }
 
-     return (
+    // ------------------------------
+    // DEFAULT UPLOAD UI
+    // ------------------------------
+    return (
         <Dashboard>
             <div className="fade-in">
                 <div className="mb-8">
@@ -235,9 +280,9 @@ function UploadResume() {
                         </div>
                     </div>
                 </div>
-    </div>
+            </div>
         </Dashboard>
-  );
+    );
 }
 
 export default UploadResume;

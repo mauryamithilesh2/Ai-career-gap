@@ -1,4 +1,5 @@
 from .nlp_setup import get_nlp
+from spacy.matcher import PhraseMatcher
 
 nlp=get_nlp()
 
@@ -16,14 +17,10 @@ def extract_skills(text: str):
         return []
     
     doc = nlp(text.lower())
-    found=[]
-    for token in doc :
-        if token.text in SKILL_LIST:
-            found.append(token.text)
-
-# check for multi-word  skills  like n-grams
-    for phrase in SKILL_LIST:
-        if " " in phrase and phrase in text.lower():
-            found.append(phrase)
-
-    return list(set(found))            
+    matcher = PhraseMatcher(nlp.vocab)
+    patterns = [nlp.make_doc(skill) for skill in SKILL_LIST]
+    matcher.add("SKILLS", patterns)
+    matches = matcher(doc)
+    found = list({doc[start:end].text for _, start, end in matches})
+    return found
+   

@@ -18,7 +18,7 @@ db.sqlite3            # Ignore default SQLite (you use PostgreSQL)
 .vscode/
 
 # Virtual Environment
-venv/
+venv310/
 env/
 ENV/
 

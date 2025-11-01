@@ -4,7 +4,10 @@ def recommend_learning_path(missing_skills):
 
     recommendations =[]
     for skill in missing_skills:
-        msg = f"Consider improving your {skill.title()} skills.you can take any course or build project uisng it."
+        msg = (
+            f"Consider improving your {skill.title()} skills. "
+            f"You can take an online course or build a small project using it."
+        )
         recommendations.append(msg)
 
     return recommendations

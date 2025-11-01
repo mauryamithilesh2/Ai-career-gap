@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    ResumeViewSet, JobDescriptionViewSet, home, RegisterView, ResumeUploadView,
+    ResumeViewSet, JobDescriptionViewSet, home, RegisterView, 
     LoginView, LogoutView, PasswordResetRequestView, PasswordResetConfirmView,
-    ChangePasswordView, UserProfileView, DashboardStatsView, JobUploadView,analyze_resume_job
+    ChangePasswordView, UserProfileView, DashboardStatsView,analyze_resume_job
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -15,8 +15,8 @@ urlpatterns = [
     # Home endpoint
     path('',home, name='home'),
     
-    path('api/resumes/upload/', ResumeUploadView.as_view(), name='resume-upload'),
-    path('api/jobs/upload/', JobUploadView.as_view(), name='job-upload'),
+    # path('api/resumes/upload/', ResumeViewSet.as_view(), name='resume-upload'),
+    # path('api/jobs/upload/', JobDescriptionViewSet.as_view(), name='job-upload'),
     
     # API routes via router
     path('api/', include(router.urls)),
@@ -43,7 +43,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     #analysis result
-    path('api/analyze/',analyze_resume_job,name='analyze_gap')
+    path('api/analyze/',analyze_resume_job,name='analyze_resume_job')
 ]
 
 

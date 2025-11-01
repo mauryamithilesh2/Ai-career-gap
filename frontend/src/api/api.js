@@ -92,5 +92,9 @@ export const jobAPI = {
     analyze: (id) => API.post(`jobs/${id}/analyze/`),
     delete: (id) => API.delete(`jobs/${id}/`),
 };
+// Analysis API endpoints
+export const analyzeAPI = {
+    analyze: (data) => API.post('analyze/', data),
+};
 
 export default API;

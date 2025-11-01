@@ -24,61 +24,6 @@ from .serializers import (
 )
 
 
-class ResumeViewSet(viewsets.ModelViewSet):
-    serializer_class = ResumeSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Resume.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        file = self.request.FILES.get('file')
-        if file:
-            serializer.save(
-                user=self.request.user,
-                file_size=file.size,
-                file_type=file.content_type
-            )
-
-    @action(detail=True, methods=['post'])
-    def analyze(self, request, pk=None):
-        resume = self.get_object()
-        resume.processing_status = 'processing'
-        resume.save()
-        
-        # Here you would implement the actual resume analysis logic
-        # For now, we'll just simulate it
-        resume.parsed_text = f"Analyzed resume for {resume.user.username}"
-        resume.processing_status = 'completed'
-        resume.is_processed = True
-        resume.save()
-        
-        return Response({'status': 'Analysis completed'})
-
-
-class JobDescriptionViewSet(viewsets.ModelViewSet):
-    serializer_class = JobDescriptionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return JobDescription.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    @action(detail=True, methods=['post'])
-    def analyze(self, request, pk=None):
-        job = self.get_object()
-        job.analysis_status = 'analyzing'
-        job.save()
-        
-        # Here you would implement the actual job analysis logic
-        job.analysis_status = 'completed'
-        job.is_analyzed = True
-        job.save()
-        
-        return Response({'status': 'Analysis completed'})
-
 
 from django.http import JsonResponse
 @api_view(['GET'])
@@ -317,30 +262,89 @@ class DashboardStatsView(APIView):
         return Response(serializer.data)
 
 from rest_framework.parsers import MultiPartParser, FormParser
-
-class ResumeUploadView(generics.CreateAPIView):
+import pdfplumber
+from rest_framework.response import Response
+from docx import Document
+import os
+class ResumeViewSet(viewsets.ModelViewSet):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    def extract_text(self, file_obj, filename):
+        ext = os.path.splitext(filename)[1].lower()
+        text = ""
+
+        if ext == '.pdf':
+            try:
+                with pdfplumber.open(file_obj) as pdf:
+                    text = "\n".join(page.extract_text() or '' for page in pdf.pages)
+            except Exception:
+                text = ""
+        elif ext == '.docx':
+            try:
+                doc = Document(file_obj)
+                text = "\n".join(p.text for p in doc.paragraphs)
+            except Exception:
+                text = ""
+        elif ext == '.txt':
+            try:
+                text = file_obj.read().decode('utf-8', errors='ignore')
+            except Exception:
+                text = ""
+        return text
+
     def perform_create(self, serializer):
         file = self.request.FILES.get('file')
+        extracted_text = ""
         if file:
-            serializer.save(
-                user=self.request.user,
-                file_size=file.size,
-                file_type=file.content_type
-            )
+            try:
+                extracted_text = self.extract_text(file, file.name)
+            except Exception as e:
+                print("Extraction error:", e)
+                extracted_text = ""
+        print("Extracted length:", len(extracted_text))
+
+        # ✅ This line must save parsed_text into database
+        serializer.save(
+            user=self.request.user,
+            file_size=file.size if file else None,
+            file_type=file.content_type if file else None,
+            parsed_text=extracted_text
+        )
+
+            # keep for immediate response
+            # self.extracted_text = extracted_text
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response({
+            "message": "Resume uploaded successfully.",
+            "resume_text": getattr(self, 'parsed_text', "")
+        }, status=status.HTTP_201_CREATED) 
 
 
-class JobUploadView(generics.CreateAPIView):
+
+
+
+class JobDescriptionViewSet(viewsets.ModelViewSet):
     queryset = JobDescription.objects.all()
     serializer_class = JobDescriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        job = serializer.save(user=self.request.user)
+        job_text = job.description or ""
+        self.job_text = job_text
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response({
+            "message": "Job description uploaded successfully.",
+            "job_text": getattr(self, 'job_text', "")
+        }, status=status.HTTP_201_CREATED)
+
 
 
 
@@ -350,15 +354,51 @@ class JobUploadView(generics.CreateAPIView):
 #it is for analysis of skills
 
 from .nlp_module.job_resume_analyzer import analyze_gap
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def analyze_resume_job(request):
-    resume_text = request.data.get('resume_text','')
-    job_text = request.data.get('job_text','')
+    try:
+        resume_id = request.data.get('resume_id')
+        job_id = request.data.get('job_id')
 
+        if not resume_id or not job_id:
+            return Response(
+                {"error": "resume_id and job_id are required."},
+                status=400
+            )
 
-    if not resume_text or not job_text:
-        return Response({"error":"Both resume_text and job_text are required."})
-    
-    result = analyze_gap(resume_text,job_text)
-    return Response(result)
+        try:
+            resume = Resume.objects.get(id=resume_id)
+            job = JobDescription.objects.get(id=job_id)
+        except (Resume.DoesNotExist, JobDescription.DoesNotExist):
+            return Response(
+                {"error": "Invalid resume_id or job_id."},
+                status=404
+            )
+
+        resume_text = getattr(resume, "parsed_text", "") or ""
+        job_text = getattr(job, "description", "") or ""
+
+        if not resume_text.strip() or not job_text.strip():
+            return Response(
+                {"error": "Missing or empty text data in resume or job."},
+                status=400
+            )
+
+        result = analyze_gap(resume_text, job_text)
+
+        if not result:
+            return Response(
+                {"error": "Analysis failed or returned no result."},
+                status=500
+            )
+
+        return Response(result, status=200)
+
+    except Exception as e:
+        # Catch any unexpected issue to prevent 500s in production
+        return Response(
+            {"error": f"Internal server error: {str(e)}"},
+            status=500
+        )
