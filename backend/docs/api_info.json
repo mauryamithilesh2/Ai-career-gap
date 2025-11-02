@@ -1,0 +1,29 @@
+{
+  "message": "Welcome to Career Gap Analyzer API!",
+  "version": "1.0.0",
+  "endpoints": {
+    "api_root": "/api/",
+    "auth": {
+      "register": "/api/auth/register/",
+      "login": "/api/auth/login/",
+      "logout": "/api/auth/logout/",
+      "password_reset": "/api/auth/password-reset/",
+      "password_reset_confirm": "/api/auth/password-reset-confirm/",
+      "change_password": "/api/auth/change-password/",
+      "profile": "/api/auth/profile/"
+    },
+    "resumes": "/api/resumes/",
+    "jobs": "/api/jobs/",
+    "dashboard": "/api/dashboard/stats/",
+    "analyze": "/api/analyze/",
+    "token": {
+      "obtain": "/api/token/",
+      "refresh": "/api/token/refresh/"
+    }
+  },
+  "authentication": {
+    "type": "Bearer Token (JWT)",
+    "header": "Authorization: Bearer <token>",
+    "note": "Most endpoints require authentication. Register or login to obtain a token."
+  }
+}

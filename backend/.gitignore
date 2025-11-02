@@ -1,0 +1,67 @@
+# -------------------------
+# 🐍 Python / Django
+# -------------------------
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.log
+
+# Environment files
+.env
+.env.*
+.env.bak
+*.env
+
+# Django specific
+db.sqlite3
+/media/
+staticfiles/
+static/
+*.pot
+*.mo
+
+# -------------------------
+# 🧠 Virtual Environments
+# -------------------------
+venv/
+venv*/
+.venv/
+env/
+env*/
+.virtualenv/
+venv310/
+
+# -------------------------
+# ⚛️ React / Node
+# -------------------------
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.*
+
+# -------------------------
+# 💾 Database Dumps (optional)
+# -------------------------
+*.dump
+*.sql
+
+# -------------------------
+# 🧪 Testing / Coverage
+# -------------------------
+.coverage
+htmlcov/
+.pytest_cache/
+
+# -------------------------
+# 💻 Editors / IDEs
+# -------------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# -------------------------
+# 🪟 OS Files
+# -------------------------
+.DS_Store
+Thumbs.db
