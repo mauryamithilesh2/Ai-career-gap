@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../api/api";
-import "./Register.css";
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -46,13 +45,9 @@ function Register() {
     const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
-        
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         setLoading(true);
-
         try {
             await authAPI.register({
                 username: formData.username,
@@ -61,156 +56,246 @@ function Register() {
                 password_confirm: formData.confirmPassword
             });
             setSuccess(true);
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            // setError(err.response?.data?.detail || err.response?.data?.message || 'Registration failed. Please try again.');
             const data = err.response?.data;
-
             if (data?.username) setError(data.username[0]);
             else if (data?.email) setError(data.email[0]);
             else if (data?.password) setError(data.password[0]);
             else if (data?.non_field_errors) setError(data.non_field_errors[0]);
             else if (typeof data === 'string') setError(data);
             else setError('Registration failed. Please try again.');
-
         } finally {
             setLoading(false);
         }
     };
 
+    // Success message card
     if (success) {
         return (
-            <div className="register-container">
-                <div className="register-card">
-                    <div className="success-message">
-                        <div className="success-icon">✅</div>
-                        <h2>Registration Successful!</h2>
-                        <p>Your account has been created successfully. Redirecting to login...</p>
-                    </div>
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50 to-gray-50 flex items-center justify-center px-4 py-12">
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md px-8 py-10 text-center">
+                    <svg
+                        className="w-16 h-16 mx-auto text-green-500 mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+                    <h2 className="text-2xl font-bold text-gray-900">Registration Successful!</h2>
+                    <p className="text-sm text-gray-600 mt-2">
+                        Your account has been created successfully. Redirecting to login...
+                    </p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="register-container">
-            <div className="register-card">
-                <div className="register-header">
-                    <div className="logo">
-                        <span className="logo-icon">🎯</span>
-                        <span className="logo-text">CareerGap</span>
-                    </div>
-                    <h1 className="register-title">Create Account</h1>
-                    <p className="register-subtitle">Join us to start analyzing your career gap</p>
-                </div>
-
-                <form onSubmit={handleRegister} className="register-form">
-                    {error && (
-                        <div className="error-message">
-                            <span className="error-icon">⚠️</span>
-                            {error}
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50 to-gray-50 flex items-center justify-center px-4 py-12">
+            <div className="w-full max-w-md">
+                {/* Register Card */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-primary-500 px-8 py-6">
+                        <div className="flex items-center space-x-3 mb-4">
+                            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                                <svg
+                                    className="w-7 h-7 text-gray-800"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                                    />
+                                </svg>
+                            </div>
+                            <span className="text-2xl font-bold text-gray-900">CareerGap</span>
                         </div>
-                    )}
-
-                    <div className="form-group">
-                        <label className="form-label">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            className="form-input"
-                            placeholder="Choose a username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
+                        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
+                        <p className="text-sm text-gray-700 mt-1">
+                            Join us to start analyzing your career gap
+                        </p>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Email Address</label>
-                        <input
-                            type="email"
-                            name="email"
-                            className="form-input"
-                            placeholder="Enter your email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            className="form-input"
-                            placeholder="Create a password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Confirm Password</label>
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            className="form-input"
-                            placeholder="Confirm your password"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-options">
-                        <label className="checkbox-label">
-                            <input type="checkbox" required />
-                            <span className="checkmark"></span>
-                            I agree to the <Link to="/terms" className="terms-link">Terms of Service</Link> and <Link to="/privacy" className="terms-link">Privacy Policy</Link>
-                        </label>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className={`btn btn-primary register-btn ${loading ? 'loading' : ''}`}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <div className="spinner"></div>
-                                Creating Account...
-                            </>
-                        ) : (
-                            <>
-                                <span>🚀</span>
-                                Create Account
-                            </>
+                    {/* Form */}
+                    <form onSubmit={handleRegister} className="px-8 py-8 space-y-6">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center space-x-2">
+                                <svg
+                                    className="w-5 h-5 flex-shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                <span>{error}</span>
+                            </div>
                         )}
-                    </button>
-                </form>
 
-                <div className="register-footer">
-                    <p className="login-text">
-                        Already have an account? 
-                        <Link to="/login" className="login-link"> Sign in here</Link>
-                    </p>
-                </div>
-            </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Username
+                            </label>
+                            <input
+                                type="text"
+                                name="username"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                placeholder="Choose a username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
 
-            <div className="register-background">
-                <div className="background-shapes">
-                    <div className="shape shape-1"></div>
-                    <div className="shape shape-2"></div>
-                    <div className="shape shape-3"></div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                placeholder="Enter your email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                placeholder="Create a password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Confirm Password
+                            </label>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                placeholder="Confirm your password"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="flex items-start">
+                            <label className="flex items-center space-x-2 text-sm text-gray-600">
+                                <input
+                                    type="checkbox"
+                                    required
+                                    className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
+                                />
+                                <span>
+                                    I agree to the{" "}
+                                    <Link to="/terms" className="text-primary-600 hover:text-primary-700 font-semibold">
+                                        Terms of Service
+                                    </Link>{" "}
+                                    and{" "}
+                                    <Link to="/privacy" className="text-primary-600 hover:text-primary-700 font-semibold">
+                                        Privacy Policy
+                                    </Link>
+                                </span>
+                            </label>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full bg-primary-500 hover:bg-primary-600 text-gray-900 font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
+                                loading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+                            }`}
+                        >
+                            {loading ? (
+                                <>
+                                    <svg
+                                        className="animate-spin h-5 w-5 text-gray-900"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                    <span>Creating Account...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                        />
+                                    </svg>
+                                    <span>Create Account</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Footer */}
+                    <div className="px-8 py-6 bg-gray-50 border-t border-gray-200">
+                        <p className="text-center text-sm text-gray-600">
+                            Already have an account?{" "}
+                            <Link
+                                to="/login"
+                                className="font-semibold text-primary-600 hover:text-primary-700"
+                            >
+                                Sign in here
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
-
 
 export default Register;
