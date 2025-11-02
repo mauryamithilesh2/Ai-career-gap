@@ -22,17 +22,44 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at', 'last_login']
 
 
+# class ResumeSerializer(serializers.ModelSerializer):
+#     user = serializers.PrimaryKeyRelatedField(read_only=True)
+#     file_size_mb = serializers.ReadOnlyField()
+#     username = serializers.CharField(source='user.username', read_only=True)
+
+#     class Meta:
+#         model = Resume
+#         fields = ['id', 'user', 'username', 'file', 'parsed_text', 'uploaded_at', 'updated_at', 
+#                  'file_size', 'file_size_mb', 'file_type', 'is_processed', 'processing_status']
+#         read_only_fields = ['id', 'user', 'uploaded_at', 'updated_at', 'file_size', 'file_type', 'is_processed', 'processing_status']
+
 class ResumeSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     file_size_mb = serializers.ReadOnlyField()
     username = serializers.CharField(source='user.username', read_only=True)
+    file_content = serializers.SerializerMethodField()  # <-- optional: to view stored binary as base64 (for admin/debug)
 
     class Meta:
         model = Resume
-        fields = ['id', 'user', 'username', 'file', 'parsed_text', 'uploaded_at', 'updated_at', 
-                 'file_size', 'file_size_mb', 'file_type', 'is_processed', 'processing_status']
-        read_only_fields = ['id', 'user', 'uploaded_at', 'updated_at', 'file_size', 'file_type', 'is_processed', 'processing_status']
+        fields = [
+            'id', 'user', 'username', 'file_name', 'parsed_text', 'uploaded_at', 'updated_at',
+            'file_size', 'file_size_mb', 'file_type', 'is_processed', 'processing_status',
+            'file_content'  # optional: remove if you don't want to expose binary data
+        ]
+        read_only_fields = [
+            'id', 'user', 'uploaded_at', 'updated_at',
+            'file_size', 'file_type', 'is_processed', 'processing_status'
+        ]
 
+    def get_file_content(self, obj):
+        """
+        Returns base64 encoded binary data — useful for internal testing only.
+        You can remove this field before production if unnecessary.
+        """
+        import base64
+        if hasattr(obj, 'file_data') and obj.file_data:
+            return base64.b64encode(obj.file_data).decode('utf-8')
+        return None
 
 class JobDescriptionSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)

@@ -11,7 +11,10 @@ from django.utils import timezone
 
 class Resume(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resumes')
-    file = models.FileField(upload_to='resumes/')
+    # file = models.FileField(upload_to='resumes/')
+    file = models.BinaryField(blank=True, null=True)
+    file_name = models.CharField(max_length=255, blank=True, null=True)
+
     parsed_text = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

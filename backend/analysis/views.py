@@ -364,7 +364,8 @@ class DashboardStatsView(APIView):
         for resume in recent_resumes:
             recent_activities.append({
                 'type': 'resume',
-                'title': resume.file.name,
+                # 'title': resume.file.name,
+                'title': getattr(resume.file, 'name', 'Unknown'),
                 'time': resume.uploaded_at,
                 'status': resume.processing_status,
                 'icon': '📄'
@@ -408,11 +409,126 @@ class DashboardStatsView(APIView):
         serializer = DashboardStatsSerializer(stats)
         return Response(serializer.data)
 
+# from rest_framework.parsers import MultiPartParser, FormParser
+# import pdfplumber
+# from rest_framework.response import Response
+# from docx import Document
+# import os
+# class ResumeViewSet(viewsets.ModelViewSet):
+#     queryset = Resume.objects.all()
+#     serializer_class = ResumeSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#     parser_classes = [MultiPartParser, FormParser]
+
+#     def get_queryset(self):
+#         return Resume.objects.filter(user=self.request.user)
+
+#     def extract_text(self, file_obj, filename):
+#         import logging
+#         logger = logging.getLogger(__name__)
+        
+#         ext = os.path.splitext(filename)[1].lower()
+#         text = ""
+
+#         if ext == '.pdf':
+#             try:
+#                 # Reset file pointer to beginning
+#                 if hasattr(file_obj, 'seek'):
+#                     file_obj.seek(0)
+#                 with pdfplumber.open(file_obj) as pdf:
+#                     text = "\n".join(page.extract_text() or '' for page in pdf.pages)
+#             except Exception as e:
+#                 logger.error(f"PDF extraction error for {filename}: {e}", exc_info=True)
+#                 text = ""
+#         elif ext == '.docx':
+#             try:
+#                 # Reset file pointer to beginning
+#                 if hasattr(file_obj, 'seek'):
+#                     file_obj.seek(0)
+#                 doc = Document(file_obj)
+#                 text = "\n".join(p.text for p in doc.paragraphs)
+#             except Exception as e:
+#                 logger.error(f"DOCX extraction error for {filename}: {e}", exc_info=True)
+#                 text = ""
+#         elif ext == '.txt':
+#             try:
+#                 # Reset file pointer to beginning
+#                 if hasattr(file_obj, 'seek'):
+#                     file_obj.seek(0)
+#                 text = file_obj.read().decode('utf-8', errors='ignore')
+#             except Exception as e:
+#                 logger.error(f"TXT extraction error for {filename}: {e}", exc_info=True)
+#                 text = ""
+#         return text
+
+#     def perform_create(self, serializer):
+#         file = self.request.FILES.get('file')
+#         extracted_text = ""
+#         file_name = "unknown"
+        
+#         if file:
+#             file_name = file.name
+#             try:
+#                 extracted_text = self.extract_text(file, file.name)
+#             except Exception as e:
+#                 import logging
+#                 logger = logging.getLogger(__name__)
+#                 logger.error(f"Text extraction error: {e}", exc_info=True)
+#                 extracted_text = ""
+        
+#         import logging
+#         logger = logging.getLogger(__name__)
+#         if extracted_text:
+#             logger.info(f"Successfully extracted {len(extracted_text)} characters from {file_name}")
+#         else:
+#             logger.warning(f"No text extracted from {file_name}")
+
+#         # ✅ This line must save parsed_text into database
+#         # Clean file_type to avoid MIME type parameters and limit length
+#         file_type = None
+#         if file and file.content_type:
+#             # Take only the MIME type part (before semicolon) and limit to 255 chars
+#             file_type = file.content_type.split(';')[0].strip()[:255]
+        
+#         serializer.save(
+#             user=self.request.user,
+#             file_size=file.size if file else None,
+#             file_type=file_type,
+#             parsed_text=extracted_text
+#         )
+
+#     def create(self, request, *args, **kwargs):
+#         from rest_framework import status
+        
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+        
+#         # Refresh serializer with saved instance to get the id
+#         serializer = self.get_serializer(instance=serializer.instance)
+        
+#         headers = self.get_success_headers(serializer.data)
+#         return Response({
+#             "message": "Resume uploaded successfully.",
+#             "id": serializer.data.get('id'),
+#             "data": serializer.data
+#         }, status=status.HTTP_201_CREATED, headers=headers) 
+
+
+
+from rest_framework import viewsets, permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser
-import pdfplumber
 from rest_framework.response import Response
+from .models import Resume
+from .serializers import ResumeSerializer
+import pdfplumber
 from docx import Document
+import io
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ResumeViewSet(viewsets.ModelViewSet):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
@@ -420,99 +536,88 @@ class ResumeViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        return Resume.objects.filter(user=self.request.user)
+        return Resume.objects.filter(user=self.request.user).order_by('-uploaded_at')[:1]
 
-    def extract_text(self, file_obj, filename):
-        import logging
+    def extract_text(self, file_bytes, filename):
+        """Extract text from in-memory file bytes (handles scanned PDFs safely)."""
+
         logger = logging.getLogger(__name__)
-        
         ext = os.path.splitext(filename)[1].lower()
         text = ""
 
-        if ext == '.pdf':
-            try:
-                # Reset file pointer to beginning
-                if hasattr(file_obj, 'seek'):
-                    file_obj.seek(0)
-                with pdfplumber.open(file_obj) as pdf:
-                    text = "\n".join(page.extract_text() or '' for page in pdf.pages)
-            except Exception as e:
-                logger.error(f"PDF extraction error for {filename}: {e}", exc_info=True)
-                text = ""
-        elif ext == '.docx':
-            try:
-                # Reset file pointer to beginning
-                if hasattr(file_obj, 'seek'):
-                    file_obj.seek(0)
-                doc = Document(file_obj)
-                text = "\n".join(p.text for p in doc.paragraphs)
-            except Exception as e:
-                logger.error(f"DOCX extraction error for {filename}: {e}", exc_info=True)
-                text = ""
-        elif ext == '.txt':
-            try:
-                # Reset file pointer to beginning
-                if hasattr(file_obj, 'seek'):
-                    file_obj.seek(0)
-                text = file_obj.read().decode('utf-8', errors='ignore')
-            except Exception as e:
-                logger.error(f"TXT extraction error for {filename}: {e}", exc_info=True)
-                text = ""
+        try:
+            if ext == '.pdf':
+                with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+                    extracted_pages = []
+                    for i, page in enumerate(pdf.pages):
+                        page_text = page.extract_text()
+                        if page_text:
+                            extracted_pages.append(page_text)
+                        else:
+                            logger.warning(f"⚠️ No text found on page {i+1} of {filename}.")
+                    text = "\n".join(extracted_pages)
+
+            elif ext == '.docx':
+                doc = Document(io.BytesIO(file_bytes))
+                text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+
+            elif ext == '.txt':
+                text = file_bytes.decode('utf-8', errors='ignore')
+
+        except Exception as e:
+            logger.error(f"Error extracting text from {filename}: {e}", exc_info=True)
+            text = ""
+
+        # Final check: handle empty result gracefully
+        if not text.strip():
+            logger.warning(f"⚠️ No extractable text found in file: {filename}")
+            text = ""
+
         return text
 
     def perform_create(self, serializer):
         file = self.request.FILES.get('file')
         extracted_text = ""
         file_name = "unknown"
-        
+        file_type = None
+        file_size = None
+        file_data = None
+
         if file:
             file_name = file.name
-            try:
-                extracted_text = self.extract_text(file, file.name)
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Text extraction error: {e}", exc_info=True)
-                extracted_text = ""
-        
-        import logging
-        logger = logging.getLogger(__name__)
+            file_type = file.content_type.split(';')[0].strip()[:255]
+            file_size = file.size
+            file_data = file.read()  # ✅ Read full binary data into memory (for DB blob)
+
+            # Extract text directly from in-memory bytes
+            extracted_text = self.extract_text(file_data, file_name)
+
         if extracted_text:
             logger.info(f"Successfully extracted {len(extracted_text)} characters from {file_name}")
         else:
             logger.warning(f"No text extracted from {file_name}")
 
-        # ✅ This line must save parsed_text into database
-        # Clean file_type to avoid MIME type parameters and limit length
-        file_type = None
-        if file and file.content_type:
-            # Take only the MIME type part (before semicolon) and limit to 255 chars
-            file_type = file.content_type.split(';')[0].strip()[:255]
-        
+        # Save everything, storing binary file content in DB
         serializer.save(
             user=self.request.user,
-            file_size=file.size if file else None,
+            parsed_text=extracted_text,
+            file_size=file_size,
             file_type=file_type,
-            parsed_text=extracted_text
+            file=file_data,
+            file_name=file_name, # ✅ store as blob (not FileField)
         )
 
     def create(self, request, *args, **kwargs):
-        from rest_framework import status
-        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        
-        # Refresh serializer with saved instance to get the id
         serializer = self.get_serializer(instance=serializer.instance)
-        
         headers = self.get_success_headers(serializer.data)
         return Response({
             "message": "Resume uploaded successfully.",
             "id": serializer.data.get('id'),
             "data": serializer.data
-        }, status=status.HTTP_201_CREATED, headers=headers) 
-
+        }, status=status.HTTP_201_CREATED, headers=headers)
 
 
 

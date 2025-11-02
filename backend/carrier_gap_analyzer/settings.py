@@ -195,8 +195,11 @@ if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# this is for hard file storage -currently not used 
+
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -238,6 +241,9 @@ SESSION_COOKIE_SECURE = not DEBUG
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Logging Configuration
+# Logging Configuration
+import logging
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -255,12 +261,13 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
+        # Show less noise in production
         'level': 'INFO' if not DEBUG else 'DEBUG',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'INFO' if not DEBUG else 'DEBUG',
             'propagate': False,
         },
         'analysis': {
@@ -268,5 +275,25 @@ LOGGING = {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
+        # 🚫 Silence noisy libraries
+        'pdfminer': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # suppress verbose debug logs
+            'propagate': False,
+        },
+        'pdfplumber': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
     },
 }
+
+# Additional runtime safety — ensures logs are quiet
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
+logging.getLogger("pdfplumber").setLevel(logging.ERROR)
+
+
+
+# import logging
+# logging.disable(logging.CRITICAL)

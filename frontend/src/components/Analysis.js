@@ -35,6 +35,14 @@ function Analyze() {
     fetchData();
   }, []);
 
+
+  //   useEffect(() => {
+  //   if (resumes.length > 0) {
+  //     setSelectedResume(resumes[0].id); // auto-select latest
+  //   }
+  // }, [resumes]);
+
+
   // 🧠 Perform resume-job analysis
   const handleAnalyze = async (e) => {
     e.preventDefault();
@@ -108,7 +116,9 @@ function Analyze() {
                 <form onSubmit={handleAnalyze} className="space-y-6">
                   {/* Resume Select */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select Resume</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Select Resume
+                    </label>
                     <select
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all bg-white"
                       value={selectedResume}
@@ -118,14 +128,17 @@ function Analyze() {
                       {resumes.length > 0 ? (
                         resumes.map((r) => (
                           <option key={r.id} value={r.id}>
-                            {r.file?.split('/').pop() || r.file || `Resume #${r.id}`}
+                            {r.file_name ? r.file_name : `Resume #${r.id}`}
                           </option>
                         ))
                       ) : (
-                        <option value="" disabled>No resumes uploaded yet</option>
+                        <option value="" disabled>
+                          No resumes uploaded yet
+                        </option>
                       )}
                     </select>
                   </div>
+
 
                   {/* Job Select */}
                   <div>
