@@ -14,9 +14,10 @@ function Analyze() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-
+  const [editingJob, setEditingJob] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
   // 🔹 Fetch uploaded resumes and jobs
-    useEffect(() => {
+  useEffect(() => {
     async function fetchData() {
       try {
         const [resumeRes, jobRes] = await Promise.all([
@@ -41,22 +42,15 @@ function Analyze() {
 
         setResumes(resumesData);
       } catch (err) {
-        const errorMsg = err.response?.data?.detail || 
-                        err.response?.data?.error ||
-                        'Unable to load resume or job data. Please try again.';
+        const errorMsg = err.response?.data?.detail ||
+          err.response?.data?.error ||
+          'Unable to load resume or job data. Please try again.';
         setError(errorMsg);
       }
     }
     fetchData();
   }, []);
 
-
-
-  //   useEffect(() => {
-  //   if (resumes.length > 0) {
-  //     setSelectedResume(resumes[0].id); // auto-select latest
-  //   }
-  // }, [resumes]);
 
 
   // 🧠 Perform resume-job analysis
@@ -82,14 +76,45 @@ function Analyze() {
       setSuccess(true);
       setError(''); // Clear any previous errors
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 
-                      err.response?.data?.detail ||
-                      'Analysis failed. Please ensure both resume and job have valid text content.';
+      const errorMsg = err.response?.data?.error ||
+        err.response?.data?.detail ||
+        'Analysis failed. Please ensure both resume and job have valid text content.';
       setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
+
+
+  const handleEditJob = (jobId) => {
+    const jobToEdit = jobs.find((j) => j.id === parseInt(jobId));
+    if (jobToEdit) {
+      setEditingJob(jobToEdit);
+      setShowEditForm(true);
+    }
+  };
+
+  const handleUpdateJob = async () => {
+    try {
+      await jobAPI.update(editingJob.id, {
+        title: editingJob.title,
+        description: editingJob.description,
+        skills: editingJob.skills,
+      });
+
+      const updatedJobs = await jobAPI.list();
+      setJobs(updatedJobs.data);
+
+      setShowEditForm(false);
+      alert('Job updated successfully!');
+    } catch (err) {
+      console.error('Error updating job:', err);
+      alert('Failed to update job.');
+    }
+  };
+
+
+
 
   return (
     <Dashboard>
@@ -175,15 +200,104 @@ function Analyze() {
                         <option value="" disabled>No job descriptions uploaded yet</option>
                       )}
                     </select>
+
+                    <button
+                      type="button"
+                      disabled={!selectedJob}
+                      onClick={() => handleEditJob(selectedJob)}
+                      className={`px-4 py-2 font-semibold rounded-lg transition-all ${selectedJob
+                          ? 'bg-primary-500 text-white hover:bg-primary-600'
+                          : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        }`}
+                    >
+                      ✏️ Edit Job description
+                    </button>
+
                   </div>
+
+                  {showEditForm && editingJob && (
+                    <div className="mt-5 p-5 border border-gray-200 rounded-xl bg-white shadow-md space-y-4">
+                      <h2 className="text-lg font-semibold text-primary-600">
+                        Edit Job – {editingJob.title}
+                      </h2>
+
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={editingJob.title}
+                        onChange={(e) =>
+                          setEditingJob({ ...editingJob, title: e.target.value })
+                        }
+                        placeholder="Job Title"
+                      />
+
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={editingJob.location}
+                        onChange={(e) =>
+                          setEditingJob({ ...editingJob, title: e.target.value })
+                        }
+                        placeholder="location"
+                      />
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={editingJob.type}
+                        onChange={(e) =>
+                          setEditingJob({ ...editingJob, title: e.target.value })
+                        }
+                        placeholder="full-time/part-time"
+                      />
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={editingJob.company}
+                        onChange={(e) =>
+                          setEditingJob({ ...editingJob, title: e.target.value })
+                        }
+                        placeholder="comany name"
+                      />
+
+                      <textarea
+                        rows="4"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        value={editingJob.description}
+                        onChange={(e) =>
+                          setEditingJob({ ...editingJob, description: e.target.value })
+                        }
+                        placeholder="Job Description / Requirements"
+                      />
+
+
+
+                      <div className="flex space-x-3">
+                        <button
+                          type="button"
+                          onClick={handleUpdateJob}
+                          className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowEditForm(false)}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+
 
                   {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full bg-primary-500 hover:bg-primary-600 text-gray-900 font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${
-                      loading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
-                    }`}
+                    className={`w-full bg-primary-500 hover:bg-primary-600 text-gray-900 font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg'
+                      }`}
                   >
                     {loading ? (
                       <>
@@ -208,15 +322,15 @@ function Analyze() {
                 {result && result.match_percent !== undefined && (
                   <div className="mt-8 space-y-6">
                     {/* Match Percentage Card */}
-                    <div className="bg-primary-500 rounded-lg shadow-lg p-8">
+                    <div className="bg-primary-500 rounded-lg shadow-lg p-2">
                       <div className="text-center">
-                        <h3 className="text-sm font-semibold uppercase tracking-wide mb-4 text-gray-700">
+                        <h3 className="text-sm font-semibold uppercase tracking-wide mb-2 text-gray-700">
                           Overall Match Score
                         </h3>
-                        <div className="text-6xl font-bold mb-4 text-gray-900">
+                        <div className="text-5xl font-bold mb-4 text-gray-900">
                           {result.match_percent || result.match_score || 0}%
                         </div>
-                        <div className="w-full bg-white bg-opacity-50 rounded-full h-3 mb-4">
+                        <div className="w-full bg-white bg-opacity-50 rounded-full h-3 mb-2">
                           <div
                             className="bg-gray-900 rounded-full h-3 transition-all duration-500"
                             style={{
@@ -228,10 +342,10 @@ function Analyze() {
                           {(result.match_percent || result.match_score || 0) >= 80
                             ? 'Excellent Match'
                             : (result.match_percent || result.match_score || 0) >= 60
-                            ? 'Good Match'
-                            : (result.match_percent || result.match_score || 0) >= 40
-                            ? 'Fair Match - Some improvements needed'
-                            : 'Needs Significant Improvement'}
+                              ? 'Good Match'
+                              : (result.match_percent || result.match_score || 0) >= 40
+                                ? 'Fair Match - Some improvements needed'
+                                : 'Needs Significant Improvement'}
                         </p>
                       </div>
                     </div>
@@ -244,7 +358,7 @@ function Analyze() {
                           <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          Your Skills
+                          Your Resume Skills
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {result.resume_skills && result.resume_skills.length > 0 ? (
@@ -300,7 +414,7 @@ function Analyze() {
                           {result.missing_skills.map((skill, idx) => (
                             <span
                               key={idx}
-                              className="px-3 py-1 bg-gray-100 text-gray-900 rounded-full text-sm font-medium border border-gray-300"
+                              className="px-4 py-1 bg-gray-50 text-red-500 rounded-full text-sm font-bold border border-gray-300"
                             >
                               {skill}
                             </span>
@@ -322,7 +436,7 @@ function Analyze() {
                           {result.recommendations.map((rec, idx) => (
                             <li
                               key={idx}
-                              className="text-gray-700 text-sm flex items-start gap-3"
+                              className="text-red-400 text-sm font-semibold flex items-start gap-3"
                             >
                               <span className="text-primary-600 mt-1 font-bold">•</span>
                               <span>{rec}</span>

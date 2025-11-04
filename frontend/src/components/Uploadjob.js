@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobAPI } from '../api/api';
 import Dashboard from './Dashboard';
 
+
 function UploadJob() {
+  
+  const [, setJobs] = useState([]);
+  
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     company: '',
     location: '',
-    requirements: '',
     salary: '',
     type: 'full-time'
   });
@@ -17,6 +21,22 @@ function UploadJob() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  
+  const [selectedJobId, setSelectedJobId] = useState('');
+  
+  
+ useEffect(() => {
+   const fetchJobs = async () => {
+     try {
+       const res = await jobAPI.list();
+       setJobs(res.data);
+     } catch (err) {
+       console.error("Error fetching jobs:", err);
+     }
+   };
+   fetchJobs();
+ }, []);
+ 
 
   const handleChange = (e) => {
     setFormData({
@@ -60,6 +80,26 @@ function UploadJob() {
       }, 2000);
     } catch (err) {
       setError(err.response?.data?.detail || err.response?.data?.message || 'Upload failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+const handleUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await jobAPI.update(selectedJobId, formData); // ← update existing job
+      const updatedJobs = await jobAPI.list(); // refresh list
+      setJobs(updatedJobs.data);
+      setSuccess(true);
+      setSelectedJobId(""); // reset to upload mode
+      alert("Job updated successfully!");
+    } catch (err) {
+      console.error("Error updating job:", err);
+      setError("Failed to update job.");
     } finally {
       setLoading(false);
     }
@@ -135,7 +175,7 @@ function UploadJob() {
                 <p className="text-sm text-gray-600 mt-1">Enter the job details for analysis</p>
               </div>
 
-              <form onSubmit={handleUpload} className="p-6 space-y-6">
+              <form onSubmit={selectedJobId ? handleUpdate : handleUpload} className="p-6 space-y-6">
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center space-x-2">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +258,7 @@ function UploadJob() {
                     type="text"
                     name="salary"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
-                    placeholder="e.g., $80,000 - $120,000"
+                    placeholder="e.g.,  Rs 20,000 - 120,000"
                     value={formData.salary}
                     onChange={handleChange}
                   />
@@ -226,12 +266,12 @@ function UploadJob() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Job Description <span className="text-red-500">*</span>
+                    Job Description &&  Key Requirements<span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="description"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all resize-none"
-                    placeholder="Provide a detailed job description including responsibilities, requirements, and qualifications..."
+                    className="w-full h-32 px-4 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all "
+                    placeholder="Enter job description or copy tech stack from job protal (skills,responsibilities, requirements, and qualifications... "
                     value={formData.description}
                     onChange={handleChange}
                     rows="8"
@@ -242,7 +282,7 @@ function UploadJob() {
                   </p>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Key Requirements
                   </label>
@@ -254,7 +294,7 @@ function UploadJob() {
                     onChange={handleChange}
                     rows="4"
                   />
-                </div>
+                </div> */}
 
                 <button
                   type="submit"
