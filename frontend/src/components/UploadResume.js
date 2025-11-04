@@ -66,34 +66,42 @@ function UploadResume() {
         return true;
     };
 
-    const handleUpload = async (e) => {
-        e.preventDefault();
+   const handleUpload = async (e) => {
+    e.preventDefault();
 
-        if (!file) {
-            setError("Please select a file first.");
-            return;
+    if (!file) {
+        setError("Please select a file first.");
+        return;
+    }
+
+    setLoading(true);
+    setError("");
+    setSuccess(false);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const response = await resumeAPI.upload(formData);
+
+        // ✅ Save the uploaded resume temporarily for instant analysis dropdown
+        if (response?.data?.data) {
+            localStorage.setItem("latest_resume", JSON.stringify(response.data.data));
         }
 
-        setLoading(true);
-        setError("");
-        setSuccess(false);
+        setSuccess(true);
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.detail ||
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            "Failed to upload resume. Please try again.";
+        setError(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+};
 
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            await resumeAPI.upload(formData);
-            setSuccess(true);
-        } catch (error) {
-            const errorMessage = error.response?.data?.detail || 
-                               error.response?.data?.error || 
-                               error.response?.data?.message ||
-                               "Failed to upload resume. Please try again.";
-            setError(errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const removeFile = () => {
         setFile(null);

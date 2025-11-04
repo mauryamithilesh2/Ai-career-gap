@@ -36,3 +36,50 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+
+:root {
+  --primary-color: #bceaed; /* bg-primary-500 */
+}
+
+/* 🔹 Theme Loading Screen */
+.loading-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);
+  color: #fff;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  border: 6px solid rgba(255, 255, 255, 0.3);
+  border-top: 6px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-screen h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.color{
+  color: black;
+}

@@ -20,7 +20,12 @@ function Login() {
             localStorage.setItem('access_token', res.data.tokens.access);
             localStorage.setItem('refresh_token', res.data.tokens.refresh);
             localStorage.setItem('user', JSON.stringify(res.data.user));           
-            navigate('/dashboard');
+            // navigate('/dashboard');
+             setTimeout(() => {
+      setLoading(false);
+      navigate("/dashboard");
+    }, 1500);
+
         } catch (err) {
             const backendError =
             err.response?.data?.detail ||
@@ -34,6 +39,15 @@ function Login() {
             setLoading(false);
         }
     };
+
+     if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <h2>Logging you in...</h2>
+      </div>
+    );
+  }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50 to-gray-50 flex items-center justify-center px-4 py-12">

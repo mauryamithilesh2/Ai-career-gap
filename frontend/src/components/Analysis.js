@@ -16,15 +16,30 @@ function Analyze() {
   const navigate = useNavigate();
 
   // 🔹 Fetch uploaded resumes and jobs
-  useEffect(() => {
+    useEffect(() => {
     async function fetchData() {
       try {
         const [resumeRes, jobRes] = await Promise.all([
           resumeAPI.list(),
           jobAPI.list(),
         ]);
-        setResumes(resumeRes.data || []);
+
+        let resumesData = resumeRes.data || [];
         setJobs(jobRes.data || []);
+
+        // ✅ Include latest uploaded resume instantly (from localStorage)
+        const latest = localStorage.getItem("latest_resume");
+        if (latest) {
+          const parsed = JSON.parse(latest);
+          const exists = resumesData.some((r) => r.id === parsed.id);
+          if (!exists) {
+            resumesData = [parsed, ...resumesData];
+          }
+          // Optional: clean up once added
+          localStorage.removeItem("latest_resume");
+        }
+
+        setResumes(resumesData);
       } catch (err) {
         const errorMsg = err.response?.data?.detail || 
                         err.response?.data?.error ||
@@ -34,6 +49,7 @@ function Analyze() {
     }
     fetchData();
   }, []);
+
 
 
   //   useEffect(() => {
