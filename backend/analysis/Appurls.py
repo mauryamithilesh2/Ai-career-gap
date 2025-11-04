@@ -9,16 +9,7 @@ from .views import (
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-# Custom router that uses our public API root view
-class CustomDefaultRouter(DefaultRouter):
-    def get_api_root_view(self, api_urls=None):
-        """
-        Return a view to use as the API root.
-        Override to use our custom api_root view that doesn't require auth
-        """
-        return api_root
-
-router = CustomDefaultRouter()
+router =DefaultRouter()
 router.register(r'resumes', ResumeViewSet, basename='resume')
 router.register(r'jobs', JobDescriptionViewSet, basename='job')
 

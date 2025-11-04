@@ -335,8 +335,7 @@ class ChangePasswordView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -345,8 +344,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         return profile
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 class DashboardStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -425,8 +423,6 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
 class ResumeViewSet(viewsets.ModelViewSet):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
@@ -519,8 +515,7 @@ class ResumeViewSet(viewsets.ModelViewSet):
 
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
+
 class JobDescriptionViewSet(viewsets.ModelViewSet):
     queryset = JobDescription.objects.all()
     serializer_class = JobDescriptionSerializer
