@@ -335,7 +335,8 @@ class ChangePasswordView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -344,7 +345,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         return profile
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 class DashboardStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -409,111 +411,6 @@ class DashboardStatsView(APIView):
         serializer = DashboardStatsSerializer(stats)
         return Response(serializer.data)
 
-# from rest_framework.parsers import MultiPartParser, FormParser
-# import pdfplumber
-# from rest_framework.response import Response
-# from docx import Document
-# import os
-# class ResumeViewSet(viewsets.ModelViewSet):
-#     queryset = Resume.objects.all()
-#     serializer_class = ResumeSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#     parser_classes = [MultiPartParser, FormParser]
-
-#     def get_queryset(self):
-#         return Resume.objects.filter(user=self.request.user)
-
-#     def extract_text(self, file_obj, filename):
-#         import logging
-#         logger = logging.getLogger(__name__)
-        
-#         ext = os.path.splitext(filename)[1].lower()
-#         text = ""
-
-#         if ext == '.pdf':
-#             try:
-#                 # Reset file pointer to beginning
-#                 if hasattr(file_obj, 'seek'):
-#                     file_obj.seek(0)
-#                 with pdfplumber.open(file_obj) as pdf:
-#                     text = "\n".join(page.extract_text() or '' for page in pdf.pages)
-#             except Exception as e:
-#                 logger.error(f"PDF extraction error for {filename}: {e}", exc_info=True)
-#                 text = ""
-#         elif ext == '.docx':
-#             try:
-#                 # Reset file pointer to beginning
-#                 if hasattr(file_obj, 'seek'):
-#                     file_obj.seek(0)
-#                 doc = Document(file_obj)
-#                 text = "\n".join(p.text for p in doc.paragraphs)
-#             except Exception as e:
-#                 logger.error(f"DOCX extraction error for {filename}: {e}", exc_info=True)
-#                 text = ""
-#         elif ext == '.txt':
-#             try:
-#                 # Reset file pointer to beginning
-#                 if hasattr(file_obj, 'seek'):
-#                     file_obj.seek(0)
-#                 text = file_obj.read().decode('utf-8', errors='ignore')
-#             except Exception as e:
-#                 logger.error(f"TXT extraction error for {filename}: {e}", exc_info=True)
-#                 text = ""
-#         return text
-
-#     def perform_create(self, serializer):
-#         file = self.request.FILES.get('file')
-#         extracted_text = ""
-#         file_name = "unknown"
-        
-#         if file:
-#             file_name = file.name
-#             try:
-#                 extracted_text = self.extract_text(file, file.name)
-#             except Exception as e:
-#                 import logging
-#                 logger = logging.getLogger(__name__)
-#                 logger.error(f"Text extraction error: {e}", exc_info=True)
-#                 extracted_text = ""
-        
-#         import logging
-#         logger = logging.getLogger(__name__)
-#         if extracted_text:
-#             logger.info(f"Successfully extracted {len(extracted_text)} characters from {file_name}")
-#         else:
-#             logger.warning(f"No text extracted from {file_name}")
-
-#         # ✅ This line must save parsed_text into database
-#         # Clean file_type to avoid MIME type parameters and limit length
-#         file_type = None
-#         if file and file.content_type:
-#             # Take only the MIME type part (before semicolon) and limit to 255 chars
-#             file_type = file.content_type.split(';')[0].strip()[:255]
-        
-#         serializer.save(
-#             user=self.request.user,
-#             file_size=file.size if file else None,
-#             file_type=file_type,
-#             parsed_text=extracted_text
-#         )
-
-#     def create(self, request, *args, **kwargs):
-#         from rest_framework import status
-        
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         self.perform_create(serializer)
-        
-#         # Refresh serializer with saved instance to get the id
-#         serializer = self.get_serializer(instance=serializer.instance)
-        
-#         headers = self.get_success_headers(serializer.data)
-#         return Response({
-#             "message": "Resume uploaded successfully.",
-#             "id": serializer.data.get('id'),
-#             "data": serializer.data
-#         }, status=status.HTTP_201_CREATED, headers=headers) 
-
 
 
 from rest_framework import viewsets, permissions, status
@@ -528,7 +425,8 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 class ResumeViewSet(viewsets.ModelViewSet):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
@@ -621,7 +519,8 @@ class ResumeViewSet(viewsets.ModelViewSet):
 
 
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 class JobDescriptionViewSet(viewsets.ModelViewSet):
     queryset = JobDescription.objects.all()
     serializer_class = JobDescriptionSerializer
@@ -732,3 +631,102 @@ def analyze_resume_job(request):
             {"error": f"Internal server error: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+
+
+
+
+#Create a new Django view for Google login 
+import requests
+
+from django.shortcuts import redirect
+from rest_framework.decorators import api_view
+from django.conf import settings
+import urllib.parse
+
+from django.shortcuts import redirect
+
+from django.contrib.auth.models import User
+
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  
+def google_login(request):
+    print("GOOGLE_CLIENT_ID:", settings.GOOGLE_CLIENT_ID)
+    print("GOOGLE_REDIRECT_URI:", settings.GOOGLE_REDIRECT_URI)
+
+    google_auth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth"
+        "?response_type=code"
+        f"&client_id={settings.GOOGLE_CLIENT_ID}"
+        f"&redirect_uri={settings.GOOGLE_REDIRECT_URI}"
+        "&scope=openid%20email%20profile"
+        "&access_type=offline"
+        "&prompt=consent"
+    )
+    return redirect(google_auth_url)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def google_callback(request):
+    code = request.GET.get('code')
+    error = request.GET.get('error')
+
+    if error == "access_denied" or not code:
+        return redirect(f"{settings.FRONTEND_URL}/login?error=google_failed")
+
+    #  If we have a code, continue normal OAuth
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "code": code,
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }
+
+    r = requests.post(token_url, data=data)
+    tokens = r.json()
+    access_token = tokens.get("access_token")
+
+    if not access_token:
+        return redirect(f"{settings.FRONTEND_URL}/login?error=token_failed")
+
+    user_info = requests.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+
+    email = user_info.get("email")
+    name = user_info.get("name", "")
+    given_name = user_info.get("given_name", "")
+    family_name = user_info.get("family_name", "")
+
+    if not email:
+        return redirect(f"{settings.FRONTEND_URL}/login?error=no_email")
+
+    user, _ = User.objects.get_or_create(
+        username=email.split("@")[0],
+        defaults={
+            "first_name": given_name or name.split(" ")[0],
+            "last_name": family_name or "",
+            "email": email,
+        },
+    )
+
+    refresh = RefreshToken.for_user(user)
+    access = refresh.access_token
+
+    # ✅ Make sure tokens are stringified before sending
+    access = str(access)
+    refresh = str(refresh)
+
+    # 🟩 Send tokens to frontend
+    redirect_url = (
+        f"{settings.FRONTEND_URL}/google-success?"
+        f"access={access}&refresh={refresh}&username={user.first_name}"
+    )
+    return redirect(redirect_url)

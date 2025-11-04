@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route,Navigate,useLocation } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
 import UploadJob from './components/Uploadjob';
@@ -10,6 +10,25 @@ import ForgotPassword from './components/ForgotPassword';
 import Analysis from './components/Analysis';
 import Profile from './components/Profile';
 import './App.css';
+import GoogleCallback from './components/GoogleCallback';
+
+
+
+
+// private route for control unothourise access
+
+function PrivateRoute({children})
+{
+  const token=localStorage.getItem('access');
+  const location=useLocation();
+
+if(!token){
+  return <Navigate to={`/login?next=${encodeURIComponent(location.Pathname)}`} replace/>
+}
+  return children;
+}
+
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -27,25 +46,38 @@ function App() {
       </div>
     );
   }
+  
   return (
     <Router>
+      <AppRoutes />
+    </Router>
+  );
+}
+
+  function AppRoutes() {
+    return(
       <Routes>
+        {/* this is pub;lic route open for all */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/analysis" element={<Analysis />} />
-        <Route path="/dashboard" element={
-          <Dashboard>
-            <DashboardHome />
-          </Dashboard>
-        } />
-        <Route path="/upload-resume" element={<UploadResume />} />
-        <Route path="/upload-job" element={<UploadJob />} />
+        <Route path="/google-success" element={<GoogleCallback  />} />
+
+        {/* protected route */}
+        <Route path="/profile"  element={ <PrivateRoute> <Profile /> </PrivateRoute> } />
+        <Route path="/analysis" element={<PrivateRoute> <Analysis /> </PrivateRoute>} />
+        <Route path="/dashboard" element={  <PrivateRoute>  <Dashboard>
+                          <DashboardHome />
+                        </Dashboard>        </PrivateRoute> } />
+        <Route path="/upload-resume" element={<PrivateRoute> <UploadResume /> </PrivateRoute>} />
+        <Route path="/upload-job" element={<PrivateRoute> <UploadJob /> </PrivateRoute>} />
+
+        {/* <Route path="/google/callback" element={<GoogleCallback />} /> */}
+
       </Routes>
-    </Router>
-  );
+   );
+
 }
 
 export default App;

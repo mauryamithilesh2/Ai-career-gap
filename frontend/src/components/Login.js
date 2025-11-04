@@ -1,3 +1,4 @@
+import GoogleLoginButton from "./GoogleLoginButton";
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../api/api";
@@ -145,7 +146,11 @@ function Login() {
                                 </>
                             )}
                         </button>
+                     <div className="my-4 flex items-center justify-center">
+                        <GoogleLoginButton />
+                        </div>
                     </form>
+ 
 
                     {/* Footer */}
                     <div className="px-8 py-6 bg-gray-50 border-t border-gray-200">
@@ -156,6 +161,7 @@ function Login() {
                             </Link>
                         </p>
                     </div>
+                    
                 </div>
             </div>
         </div>

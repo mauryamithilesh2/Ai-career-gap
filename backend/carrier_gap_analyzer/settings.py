@@ -17,9 +17,14 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv("DEBUG", "TRUE").upper() == "TRUE"  # fallback to True if env missing
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -28,8 +33,6 @@ if not SECRET_KEY and not DEBUG:
 if not SECRET_KEY:
     SECRET_KEY = "django-insecure-default-key-for-dev"  # Only for development
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "TRUE").upper() == "TRUE"  # fallback to True if env missing
 
 ALLOWED_HOSTS = ["ai-career-gap.onrender.com", "*.onrender.com", "localhost", "127.0.0.1"]
 
@@ -37,7 +40,7 @@ ALLOWED_HOSTS = ["ai-career-gap.onrender.com", "*.onrender.com", "localhost", "1
 # Application definition
 
 INSTALLED_APPS = [
-    'rest_framework_simplejwt',
+    # 'rest_framework_simplejwt',
     'rest_framework',
     'analysis',
     'corsheaders',  # for frontend integration
@@ -295,5 +298,5 @@ logging.getLogger("pdfplumber").setLevel(logging.ERROR)
 
 
 
-# import logging
-# logging.disable(logging.CRITICAL)
+import logging
+logging.disable(logging.CRITICAL)
