@@ -1,6 +1,6 @@
 import GoogleLoginButton from "./GoogleLoginButton";
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link,useLocation } from "react-router-dom";
 import { authAPI } from "../api/api";
 
 function Login() {
@@ -9,23 +9,26 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
+
+    
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
+        
         try {
             const res = await authAPI.login({ username, password });
             
-            localStorage.setItem('access_token', res.data.tokens.access);
-            localStorage.setItem('refresh_token', res.data.tokens.refresh);
+            localStorage.setItem('access', res.data.tokens.access);
+            localStorage.setItem('refresh', res.data.tokens.refresh);
             localStorage.setItem('user', JSON.stringify(res.data.user));           
             // navigate('/dashboard');
-             setTimeout(() => {
-      setLoading(false);
-      navigate("/dashboard");
-    }, 1500);
+            const nextPage = new URLSearchParams(location.search).get("next") || "/dashboard";
+            
+            navigate(nextPage);
+           
 
         } catch (err) {
             const backendError =

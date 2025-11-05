@@ -23,7 +23,7 @@ function PrivateRoute({children})
   const location=useLocation();
 
 if(!token){
-  return <Navigate to={`/login?next=${encodeURIComponent(location.Pathname)}`} replace/>
+  return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace/>
 }
   return children;
 }
