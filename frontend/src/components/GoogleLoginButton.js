@@ -13,8 +13,12 @@ function GoogleLoginButton() {
   return (
     <button
       onClick={handleGoogleLogin}
-      className="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+      className="w-full bg-white text-black font-semibold py-3 px-4 rounded-lg  transition-colors border border-gray-400 shadow-md"
     >
+      <img 
+src="https://developers.google.com/identity/images/g-logo.png"    alt="Google" 
+    className="w-5 h-5 inline-block mr-2 my-auto"
+  />
       Continue with Google
     </button>
   );
