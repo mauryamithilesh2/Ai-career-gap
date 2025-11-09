@@ -47,9 +47,9 @@ function Profile() {
   const validatePhone = (phone) => {
     if (!phone) return true; // Phone is optional in profile
     // Remove spaces, dashes, and parentheses
-    const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+    const cleaned = phone.replace(/[\s-()]/g, '');
     // Check if it starts with + and has 10-15 digits, or just has 10-15 digits
-    const phoneRegex = /^(\+?\d{1,3})?[\d]{10,15}$/;
+    const phoneRegex = /^(\+?\d{1,3})?\d{10,15}$/;
     return phoneRegex.test(cleaned);
   };
 
