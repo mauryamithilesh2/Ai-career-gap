@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const GOOGLE_LOGIN_URL = 
   window.location.hostname === "localhost"
     ? "http://127.0.0.1:8000/api/auth/google/login/"
-    : "https://ai-career-gap.onrender.com/api/auth/google/login/";
+    : "https://careerinsight-ai.onrender.com/api/auth/google/login/";
 
 function GoogleLoginButton() {
   const [loading, setLoading] = useState(false);
