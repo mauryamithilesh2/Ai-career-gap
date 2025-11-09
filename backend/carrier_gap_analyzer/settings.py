@@ -34,7 +34,7 @@ if not SECRET_KEY:
     SECRET_KEY = "django-insecure-default-key-for-dev"  # Only for development
 
 
-ALLOWED_HOSTS = ["ai-career-gap.onrender.com", "*.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["careerinsight-ai.onrender.com", "*.onrender.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -74,8 +74,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React development server
     "http://127.0.0.1:3000",  # React development server
-    "https://ai-career-gap.vercel.app",  # Production frontend URL
-    "https://ai-career-gap-frontend.onrender.com",  # Alternative production frontend URL
+    "https://careerinsight-ai.vercel.app",  # Production frontend URL
+    "https://careerinsight-ai-frontend.onrender.com",  # Alternative production frontend URL
 ]
 # Allow common Vercel/Render subdomains without hardcoding exact preview URLs
 CORS_ALLOWED_ORIGIN_REGEXES = [
@@ -85,8 +85,8 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
-    "https://ai-career-gap.vercel.app",
-    "https://ai-career-gap.onrender.com",
+    "https://careerinsight-ai.vercel.app",
+    "https://careerinsight-ai.onrender.com",
     "https://*.vercel.app",
     "https://*.onrender.com",
 ]
@@ -327,3 +327,4 @@ logging.getLogger("pdfplumber").setLevel(logging.ERROR)
 
 import logging
 logging.disable(logging.CRITICAL)
+
