@@ -35,15 +35,12 @@ function DashboardHome() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    let isMounted = true;
-    async function loadStats() {
-      await fetchStats();
-    }
-    loadStats();
-    return () => { isMounted = false; };
-  }, []);
+useEffect(() => {
+  async function loadStats() {
+    await fetchStats();
+  }
+  loadStats();
+}, []);
 
   const stats = [
     {

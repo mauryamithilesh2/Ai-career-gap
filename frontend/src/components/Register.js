@@ -24,13 +24,15 @@ function Register() {
         });
     };
 
-    const validatePhone = (phone) => {
-        // Remove spaces, dashes, and parentheses
-        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
-        // Check if it starts with + and has 10-15 digits, or just has 10-15 digits
-        const phoneRegex = /^(\+?\d{1,3})?[\d]{10,15}$/;
-        return phoneRegex.test(cleaned);
-    };
+   const validatePhone = (phone) => {
+  if (!phone) return true; // optional field
+  // Remove spaces, dashes, and parentheses
+  const cleaned = phone.replace(/[\s-()]/g, '');
+  // Allow +country-code or plain numbers, 10–15 digits total
+  const phoneRegex = /^(\+?\d{1,3})?\d{10,15}$/;
+  return phoneRegex.test(cleaned);
+};
+
 
     const validateForm = () => {
         if (!formData.username || !formData.email || !formData.first_name || 
