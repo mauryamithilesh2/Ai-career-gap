@@ -5,10 +5,12 @@ import { authAPI } from '../api/api';
 
 function Profile() {
   const [profile, setProfile] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
+    username: '',
     email: '',
-    mobile: '',
-    address: '',
+    phone: '',
+    bio: '',
   });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,11 +25,16 @@ function Profile() {
         const data = res.data;
         const userData = data.user || {};
         setProfile({
-          name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.username || '',
+          first_name: userData.first_name || '',
+          last_name: userData.last_name || '',
+          username: userData.username || '',
           email: userData.email || '',
-          mobile: data.phone || '',
-          address: '',
+          phone: data.phone || '',
+          bio: data.bio || '',
         });
+        
+        // Update localStorage with fresh user data
+        localStorage.setItem('user', JSON.stringify(userData));
       } catch (err) {
         const errorMsg = err.response?.data?.detail || 
                         'Unable to load profile. Please try again.';
@@ -36,6 +43,15 @@ function Profile() {
     };
     fetchProfile();
   }, []);
+
+  const validatePhone = (phone) => {
+    if (!phone) return true; // Phone is optional in profile
+    // Remove spaces, dashes, and parentheses
+    const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+    // Check if it starts with + and has 10-15 digits, or just has 10-15 digits
+    const phoneRegex = /^(\+?\d{1,3})?[\d]{10,15}$/;
+    return phoneRegex.test(cleaned);
+  };
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -47,20 +63,59 @@ function Profile() {
     setError('');
     setSuccess(false);
 
+    // Validate form
+    if (!profile.first_name || profile.first_name.length < 2) {
+      setError('First name must be at least 2 characters long');
+      setLoading(false);
+      return;
+    }
+    if (!profile.last_name || profile.last_name.length < 2) {
+      setError('Last name must be at least 2 characters long');
+      setLoading(false);
+      return;
+    }
+    if (!profile.email) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(profile.email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+    if (profile.phone && !validatePhone(profile.phone)) {
+      setError('Please enter a valid phone number (e.g., +91 9876543210 or 9876543210)');
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Update profile with user fields
       await authAPI.updateProfile({
-        phone: profile.mobile,
-        bio: '',
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        email: profile.email,
+        phone: profile.phone || '',
+        bio: profile.bio || '',
       });
 
+      // Fetch updated profile
       const userRes = await authAPI.getProfile();
       const userData = userRes.data.user || {};
       setProfile({
-        name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || userData.username || '',
-        email: userData.email || profile.email,
-        mobile: userRes.data.phone || profile.mobile,
-        address: profile.address,
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        username: userData.username || '',
+        email: userData.email || '',
+        phone: userRes.data.phone || '',
+        bio: userRes.data.bio || '',
       });
+      
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      
       setSuccess(true);
       setEditMode(false);
       setTimeout(() => setSuccess(false), 2500);
@@ -136,28 +191,35 @@ function Profile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Full Name
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        name="name"
+                        name="first_name"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        value={profile.name}
+                        value={profile.first_name}
                         onChange={handleChange}
                         disabled={!editMode}
+                        placeholder="Enter first name"
+                        required
+                        minLength={2}
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Email
+                        Last Name <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="email"
-                        name="email"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
-                        value={profile.email}
-                        disabled
+                        type="text"
+                        name="last_name"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        value={profile.last_name}
+                        onChange={handleChange}
+                        disabled={!editMode}
+                        placeholder="Enter last name"
+                        required
+                        minLength={2}
                       />
                     </div>
                   </div>
@@ -165,33 +227,68 @@ function Profile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Mobile Number
+                        Username
                       </label>
                       <input
                         type="text"
-                        name="mobile"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="e.g. +91 9876543210"
-                        value={profile.mobile}
-                        onChange={handleChange}
-                        disabled={!editMode}
+                        name="username"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                        value={profile.username}
+                        disabled
                       />
+                      <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Address
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="text"
-                        name="address"
+                        type="email"
+                        name="email"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        placeholder="e.g. Mumbai, India"
-                        value={profile.address}
+                        value={profile.email}
+                        onChange={handleChange}
+                        disabled={!editMode}
+                        placeholder="Enter email address"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="e.g., +91 9876543210 or 9876543210"
+                        value={profile.phone}
                         onChange={handleChange}
                         disabled={!editMode}
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enter phone number with country code (optional)
+                      </p>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Bio
+                    </label>
+                    <textarea
+                      name="bio"
+                      rows="4"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
+                      placeholder="Tell us about yourself..."
+                      value={profile.bio}
+                      onChange={handleChange}
+                      disabled={!editMode}
+                    />
                   </div>
 
                   {editMode && (

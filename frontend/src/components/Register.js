@@ -6,6 +6,9 @@ function Register() {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
         password: '',
         confirmPassword: ''
     });
@@ -21,9 +24,31 @@ function Register() {
         });
     };
 
+    const validatePhone = (phone) => {
+        // Remove spaces, dashes, and parentheses
+        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        // Check if it starts with + and has 10-15 digits, or just has 10-15 digits
+        const phoneRegex = /^(\+?\d{1,3})?[\d]{10,15}$/;
+        return phoneRegex.test(cleaned);
+    };
+
     const validateForm = () => {
-        if (!formData.username || !formData.email || !formData.password) {
+        if (!formData.username || !formData.email || !formData.first_name || 
+            !formData.last_name || !formData.phone || !formData.password) {
             setError('All fields are required');
+            return false;
+        }
+        if (formData.username.length < 3) {
+            setError('Username must be at least 3 characters long');
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setError('Please enter a valid email address');
+            return false;
+        }
+        if (!validatePhone(formData.phone)) {
+            setError('Please enter a valid phone number (e.g., +91 9876543210 or 9876543210)');
             return false;
         }
         if (formData.password !== formData.confirmPassword) {
@@ -34,9 +59,12 @@ function Register() {
             setError('Password must be at least 6 characters long');
             return false;
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            setError('Please enter a valid email address');
+        if (formData.first_name.length < 2) {
+            setError('First name must be at least 2 characters long');
+            return false;
+        }
+        if (formData.last_name.length < 2) {
+            setError('Last name must be at least 2 characters long');
             return false;
         }
         return true;
@@ -52,6 +80,9 @@ function Register() {
             await authAPI.register({
                 username: formData.username,
                 email: formData.email,
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                phone: formData.phone,
                 password: formData.password,
                 password_confirm: formData.confirmPassword
             });
@@ -149,9 +180,43 @@ function Register() {
                             </div>
                         )}
 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    First Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                    placeholder="Enter first name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    required
+                                    minLength={2}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Last Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                    placeholder="Enter last name"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    required
+                                    minLength={2}
+                                />
+                            </div>
+                        </div>
+
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Username
+                                Username <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -161,12 +226,13 @@ function Register() {
                                 value={formData.username}
                                 onChange={handleChange}
                                 required
+                                minLength={3}
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Email Address
+                                Email Address <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="email"
@@ -181,22 +247,41 @@ function Register() {
 
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Password
+                                Phone Number <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
+                                placeholder="e.g., +91 9876543210 or 9876543210"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Enter phone number with country code (e.g., +91 9876543210)
+                            </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Password <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="password"
                                 name="password"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
-                                placeholder="Create a password"
+                                placeholder="Create a password (min. 6 characters)"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                                minLength={6}
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Confirm Password
+                                Confirm Password <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="password"
@@ -206,6 +291,7 @@ function Register() {
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                                 required
+                                minLength={6}
                             />
                         </div>
 

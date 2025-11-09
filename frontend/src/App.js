@@ -9,8 +9,10 @@ import DashboardHome from './components/DashboardHome';
 import ForgotPassword from './components/ForgotPassword';
 import Analysis from './components/Analysis';
 import Profile from './components/Profile';
-import './App.css';
 import GoogleCallback from './components/GoogleCallback';
+import ResumeGenerator from './components/ResumeGenerator';
+import SpeakAssessment from './components/SpeakAssessment';
+import './App.css';
 
 
 
@@ -72,6 +74,8 @@ function App() {
                         </Dashboard>        </PrivateRoute> } />
         <Route path="/upload-resume" element={<PrivateRoute> <UploadResume /> </PrivateRoute>} />
         <Route path="/upload-job" element={<PrivateRoute> <UploadJob /> </PrivateRoute>} />
+        <Route path="/resume-generator" element={<PrivateRoute> <ResumeGenerator/> </PrivateRoute>}/>
+        <Route path="/speak-assessment" element={<PrivateRoute> <SpeakAssessment/> </PrivateRoute>}/>
 
         {/* <Route path="/google/callback" element={<GoogleCallback />} /> */}
 

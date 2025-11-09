@@ -5,7 +5,7 @@ from .views import (
     api_info,
     LoginView, LogoutView, PasswordResetRequestView, PasswordResetConfirmView,
     ChangePasswordView, UserProfileView, DashboardStatsView,analyze_resume_job,
-    google_login,google_callback
+    google_login,google_callback,GenerateResumeAPIView,AnalyzeSpeech
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -43,14 +43,15 @@ urlpatterns = [
     # JWT token endpoints (keeping for compatibility)
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    
     #analysis result
     path('api/analyze/',analyze_resume_job,name='analyze_resume_job'),
 
 
     path("api/auth/google/login/",google_login, name="google_login"),
-    path("api/auth/google/callback/", google_callback, name="google_callback")
-
+    path("api/auth/google/callback/", google_callback, name="google_callback"),
+    path("api/generate-resume/",GenerateResumeAPIView.as_view(),name="generate_resume"),
+    path("api/speak-assessment/",AnalyzeSpeech.as_view(),name="speak_assessment"),
 ]
 
 

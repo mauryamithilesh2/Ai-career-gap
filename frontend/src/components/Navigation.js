@@ -43,6 +43,16 @@ function Navigation() {
           >
             Upload Job
           </Link>
+          <Link 
+            to="/resume-generator" 
+            style={{ color: 'white', textDecoration: 'none', padding: '8px 16px' }}
+          >
+            Generate Resume
+          </Link>
+          <Link to="/speak-assessment" className="menu-link">
+            🎤 Speaking Assessment
+          </Link>
+
         </div>
       </div>
     </nav>

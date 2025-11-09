@@ -101,11 +101,25 @@ export const jobAPI = {
     delete: (id) => API.delete(`jobs/${id}/`),
 };
 
+// generating resume Api Endpoints
+export const resumeGenAPI = {
+    generate: (data) => API.post('generate-resume/', data),
+    build: (data) => API.post('resume/build/', data),
+    preview: (id) => API.get(`resume/preview/${id}/`),
+};
 
 // Analysis API endpoints
 export const analyzeAPI = {
     analyze: (data) => API.post('analyze/', data),
 };
+
+export const speakAPI = {
+  analyze: (data) => API.post("speak-assessment/", data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000 // Increase timeout for audio processing
+  }),
+};
+
 
 export default API;
 

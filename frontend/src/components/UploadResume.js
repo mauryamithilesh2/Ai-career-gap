@@ -161,15 +161,15 @@ function UploadResume() {
 
     return (
         <Dashboard>
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload Resume</h1>
                     <p className="text-gray-600">Upload your resume to start the career gap analysis</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                     {/* Upload Section */}
-                    <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div className="lg:col-span-3 bg-white rounded-lg border border-gray-200 shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h2 className="text-lg font-bold text-gray-900">Resume Upload</h2>
                             <p className="text-sm text-gray-600 mt-1">Select your resume file to get started</p>
@@ -186,7 +186,7 @@ function UploadResume() {
                             )}
 
                             <div
-                                className={`border-2 border-dashed rounded-lg p-6 text-center transition-all relative ${
+                                className={`border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-all relative min-h-[200px] flex items-center justify-center ${
                                     dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'
                                 } ${file ? 'border-primary-500 bg-primary-50' : ''}`}
                                 onDragEnter={handleDrag}
@@ -202,34 +202,34 @@ function UploadResume() {
                                     id="file-upload"
                                 />
                                 {file ? (
-                                    <div className="space-y-3">
-                                        <div className="w-12 h-12 mx-auto bg-primary-100 rounded-lg flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="space-y-4 w-full">
+                                        <div className="w-16 h-16 mx-auto bg-primary-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">{file.name}</h3>
-                                            <p className="text-xs text-gray-600">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                            <h3 className="font-semibold text-gray-900 text-base mb-1 truncate">{file.name}</h3>
+                                            <p className="text-sm text-gray-600">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={removeFile}
-                                            className="text-xs text-primary-600 hover:text-primary-800 font-medium underline"
+                                            className="text-sm text-primary-600 hover:text-primary-800 font-medium underline"
                                         >
                                             Remove file
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-3">
-                                        <div className="w-12 h-12 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="space-y-4 w-full">
+                                        <div className="w-16 h-16 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Drop your resume here</h3>
-                                            <p className="text-xs text-gray-600 mb-2">or click to browse files</p>
+                                            <h3 className="font-semibold text-gray-900 text-base mb-1">Drop your resume here</h3>
+                                            <p className="text-sm text-gray-600 mb-2">or click to browse files</p>
                                         </div>
                                     </div>
                                 )}
@@ -271,7 +271,7 @@ function UploadResume() {
                     </div>
 
                     {/* Instructions */}
-                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h2 className="text-lg font-bold text-gray-900">Tips</h2>
                             <p className="text-sm text-gray-600 mt-1">Quick guidelines</p>

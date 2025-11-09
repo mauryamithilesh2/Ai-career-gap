@@ -349,6 +349,10 @@ class DashboardStatsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        from django.utils import timezone
+        from datetime import timedelta
+        import json
+        
         user = request.user
         
         # Calculate stats
@@ -356,54 +360,139 @@ class DashboardStatsView(APIView):
         total_jobs = JobDescription.objects.filter(user=user).count()
         total_analyses = AnalysisResult.objects.filter(user=user).count()
         
+        # Calculate match accuracy from analysis results
+        match_accuracy = 0.0
+        if total_analyses > 0:
+            import logging
+            logger = logging.getLogger(__name__)
+            analyses = AnalysisResult.objects.filter(user=user)
+            total_match_score = 0
+            count_with_score = 0
+            
+            for analysis in analyses:
+                result_data = analysis.result_data
+                if isinstance(result_data, dict):
+                    # Try to extract match score from different possible keys
+                    # Note: analyze_gap returns 'match_percent' (not 'match_percentage')
+                    match_score = (
+                        result_data.get('match_percent') or  # Primary key from analyze_gap
+                        result_data.get('match_percentage') or
+                        result_data.get('match_score') or
+                        result_data.get('overall_match') or
+                        result_data.get('match_accuracy') or
+                        result_data.get('score')
+                    )
+                    if match_score is not None:
+                        try:
+                            score = float(match_score)
+                            if 0 <= score <= 100:
+                                total_match_score += score
+                                count_with_score += 1
+                        except (ValueError, TypeError):
+                            logger.warning(f"Invalid match score format: {match_score}")
+                            pass
+                    else:
+                        # Log if no match score found
+                        logger.debug(f"No match score found in analysis {analysis.id}. Keys: {list(result_data.keys())}")
+            
+            if count_with_score > 0:
+                match_accuracy = round(total_match_score / count_with_score, 1)
+                logger.info(f"Calculated match accuracy: {match_accuracy}% from {count_with_score} analyses")
+            else:
+                # Default to 0 if no scores found
+                match_accuracy = 0.0
+                logger.warning(f"No match scores found in {total_analyses} analyses")
+        
+        # Calculate average analysis time
+        # Since analysis is done synchronously, we can't measure actual processing time
+        # Instead, we'll use a reasonable estimate or calculate from a different metric
+        avg_analysis_time = 0.0
+        if total_analyses > 0:
+            # For now, estimate based on analysis complexity
+            # You could also store actual processing time when analysis is performed
+            analyses = AnalysisResult.objects.filter(user=user)
+            total_time_seconds = 0
+            count_with_time = 0
+            
+            for analysis in analyses:
+                # Calculate time difference between created_at and updated_at
+                # This might be very small if analysis is fast, so we use a minimum
+                if analysis.created_at and analysis.updated_at:
+                    time_diff = (analysis.updated_at - analysis.created_at).total_seconds()
+                    # If time difference is too small (less than 0.1s), use estimated time
+                    # based on result_data complexity
+                    if time_diff < 0.1:
+                        result_data = analysis.result_data
+                        if isinstance(result_data, dict):
+                            # Estimate: 1-3 seconds based on data complexity
+                            skills_count = len(result_data.get('resume_skills', [])) + len(result_data.get('job_skills', []))
+                            estimated_time = min(3.0, max(1.0, skills_count * 0.1))
+                            total_time_seconds += estimated_time
+                            count_with_time += 1
+                    else:
+                        total_time_seconds += time_diff
+                        count_with_time += 1
+            
+            if count_with_time > 0:
+                avg_analysis_time = round(total_time_seconds / count_with_time, 1)
+            else:
+                # Default estimate if no time data
+                avg_analysis_time = 2.0
+        
         # Recent activities
         recent_activities = []
         
-        # Recent resumes
-        recent_resumes = Resume.objects.filter(user=user)[:3]
+        # Recent resumes (ordered by most recent)
+        recent_resumes = Resume.objects.filter(user=user).order_by('-uploaded_at')[:5]
         for resume in recent_resumes:
+            file_name = resume.file_name or 'Untitled Resume'
             recent_activities.append({
                 'type': 'resume',
-                # 'title': resume.file.name,
-                'title': getattr(resume.file, 'name', 'Unknown'),
-                'time': resume.uploaded_at,
-                'status': resume.processing_status,
+                'title': file_name,
+                'time': resume.uploaded_at.isoformat() if resume.uploaded_at else timezone.now().isoformat(),
+                'status': resume.processing_status or 'pending',
                 'icon': '📄'
             })
         
-        # Recent jobs
-        recent_jobs = JobDescription.objects.filter(user=user)[:3]
+        # Recent jobs (ordered by most recent)
+        recent_jobs = JobDescription.objects.filter(user=user).order_by('-uploaded_at')[:5]
         for job in recent_jobs:
             recent_activities.append({
                 'type': 'job',
-                'title': job.title,
-                'time': job.uploaded_at,
-                'status': job.analysis_status,
+                'title': job.title or 'Untitled Job',
+                'time': job.uploaded_at.isoformat() if job.uploaded_at else timezone.now().isoformat(),
+                'status': job.analysis_status or 'pending',
                 'icon': '💼'
             })
         
-        # Recent analyses
-        recent_analyses = AnalysisResult.objects.filter(user=user)[:3]
+        # Recent analyses (ordered by most recent)
+        recent_analyses = AnalysisResult.objects.filter(user=user).order_by('-created_at')[:5]
         for analysis in recent_analyses:
+            analysis_title = f"{analysis.analysis_type.replace('_', ' ').title()}"
+            if analysis.resume:
+                analysis_title += f" - {analysis.resume.file_name or 'Resume'}"
+            if analysis.job:
+                analysis_title += f" vs {analysis.job.title or 'Job'}"
+            
             recent_activities.append({
                 'type': 'analysis',
-                'title': f"{analysis.analysis_type.replace('_', ' ').title()}",
-                'time': analysis.created_at,
+                'title': analysis_title,
+                'time': analysis.created_at.isoformat() if analysis.created_at else timezone.now().isoformat(),
                 'status': 'completed',
                 'icon': '📊'
             })
         
-        # Sort by time
+        # Sort by time (most recent first)
         recent_activities.sort(key=lambda x: x['time'], reverse=True)
-        recent_activities = recent_activities[:5]
+        recent_activities = recent_activities[:10]  # Show top 10 most recent
         
         stats = {
             'total_resumes': total_resumes,
             'total_jobs': total_jobs,
             'total_analyses': total_analyses,
             'recent_activities': recent_activities,
-            'match_accuracy': 95.0,  # This would be calculated from actual data
-            'avg_analysis_time': 2.3  # This would be calculated from actual data
+            'match_accuracy': match_accuracy,
+            'avg_analysis_time': avg_analysis_time
         }
         
         serializer = DashboardStatsSerializer(stats)
@@ -703,14 +792,26 @@ def google_callback(request):
     if not email:
         return redirect(f"{settings.FRONTEND_URL}/login?error=no_email")
 
-    user, _ = User.objects.get_or_create(
+    # Get or create user
+    user, created = User.objects.get_or_create(
         username=email.split("@")[0],
         defaults={
-            "first_name": given_name or name.split(" ")[0],
+            "first_name": given_name or name.split(" ")[0] if name else "",
             "last_name": family_name or "",
             "email": email,
         },
     )
+    
+    # Update user info if user already exists (to sync with Google profile)
+    if not created:
+        user.first_name = given_name or name.split(" ")[0] if name else user.first_name or ""
+        user.last_name = family_name or user.last_name or ""
+        user.email = email
+        user.save()
+    
+    # Ensure UserProfile exists
+    from .models import UserProfile
+    UserProfile.objects.get_or_create(user=user)
 
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
@@ -722,6 +823,216 @@ def google_callback(request):
     # 🟩 Send tokens to frontend
     redirect_url = (
         f"{settings.FRONTEND_URL}/google-success?"
-        f"access={access}&refresh={refresh}&username={user.first_name}"
+        f"access={access}&refresh={refresh}"
     )
     return redirect(redirect_url)
+
+
+
+
+
+
+# resume generation views 
+import openai
+from .serializers import ResumeInputSerializer
+
+openai.api_key= settings.OPENAI_API_KEY
+class GenerateResumeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ResumeInputSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+
+            projects = ", ".join(data.get('projects', []))
+            achievements = ", ".join(data.get('achievements', []))
+
+            prompt = f"""
+            Rewrite the following resume details in a professional, ATS-friendly format:
+            Name: {data.get('name', 'N/A')}
+            Role: {data.get('role', 'N/A')}
+            Education: {data.get('education', 'N/A')}
+            Skills: {data.get('skills', 'N/A')}
+            Projects: {projects}
+            Internship: {data.get('internship', 'None')}
+            Achievements: {achievements}
+
+            Return structured text as sections with headings like Name, Role, Education, Skills, Projects, Internship, Achievements
+            1. Professional Summary (3 lines)
+            2. Skills (formatted list)
+            3. Projects (each as bullet points with outcome-based description)
+            4. Experience (if available)
+            5. Education
+            6. Achievements (if available)
+                        """
+
+            try:
+                response = openai.chat.completions.create(
+                    model="gpt-4.1-mini",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=1000,
+                    temperature=0.4
+                )
+                formatted_resume = response.choices[0].message.content.strip()
+                return Response({"formatted_resume": formatted_resume}, status=200)
+            except Exception as e:
+                print("OpenAI API Error:", e)
+                return Response({"detail": "Failed to generate resume. Check server logs."}, status=500)
+
+        return Response(serializer.errors, status=400)
+
+
+
+
+
+# import wisper
+from openai import OpenAI
+import json
+import re
+
+# Initialize OpenAI client with API key validation
+if not settings.OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY is not set in settings")
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+# model_whisper=wisper.load_model("base")
+
+class AnalyzeSpeech(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        try:
+            audio_file = request.FILES.get("audio")
+            if not audio_file:
+                return Response({"error": "No audio file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Ensure the file is at the beginning
+            audio_file.seek(0)
+            
+            # ✅ Speech → Text (using OpenAI Whisper cloud model)
+            try:
+                # The Whisper API accepts the file directly
+                # Pass as tuple: (filename, file_object, content_type)
+                file_name = audio_file.name or "audio.webm"
+                file_content = audio_file.read()
+                content_type = audio_file.content_type or "audio/webm"
+                
+                # Reset file pointer after reading
+                audio_file.seek(0)
+                
+                # Create file tuple for OpenAI API
+                file_tuple = (file_name, file_content, content_type)
+                
+                transcript_response = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=file_tuple
+                )
+                
+                # Extract transcript text
+                transcript = transcript_response.text
+            except Exception as whisper_error:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Whisper API error: {whisper_error}", exc_info=True)
+                return Response(
+                    {"error": f"Failed to transcribe audio: {str(whisper_error)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # Check if transcript is empty
+            if not transcript or not transcript.strip():
+                return Response(
+                    {"error": "No speech detected in the audio file. Please ensure the audio contains speech."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Analyze speech using openai
+            prompt = f"""
+            Analyze this speech text for communication quality:
+
+            "{transcript}"
+
+            Return a JSON object with the following structure:
+            {{
+                "clarity": <score out of 10>,
+                "confidence": <score out of 10>,
+                "fluency": <score out of 10>,
+                "feedback": "<short improvement feedback>"
+            }}
+
+            Only return the JSON object, no additional text.
+            """
+
+            try:
+                gpt_response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"}
+                )
+                analysis_text = gpt_response.choices[0].message.content
+            except Exception as gpt_error:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"GPT API error: {gpt_error}", exc_info=True)
+                return Response(
+                    {"error": f"Failed to analyze speech: {str(gpt_error)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Parse the JSON response
+            try:
+                analysis_data = json.loads(analysis_text)
+            except json.JSONDecodeError as json_error:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"JSON decode error, using fallback parser: {json_error}")
+                # Fallback: try to extract scores from text if JSON parsing fails
+                analysis_data = self._parse_analysis_text(analysis_text)
+
+            return Response({
+                "transcript": transcript,
+                "clarity": analysis_data.get("clarity", 0),
+                "confidence": analysis_data.get("confidence", 0),
+                "fluency": analysis_data.get("fluency", 0),
+                "feedback": analysis_data.get("feedback", "Unable to analyze speech.")
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import logging
+            import traceback
+            logger = logging.getLogger(__name__)
+            error_trace = traceback.format_exc()
+            logger.error(f"Error in AnalyzeSpeech: {e}\n{error_trace}", exc_info=True)
+            return Response(
+                {
+                    "error": "Failed to analyze speech. Please try again.",
+                    "detail": str(e) if settings.DEBUG else None
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def _parse_analysis_text(self, text):
+        """Fallback method to extract scores from text if JSON parsing fails"""
+        result = {
+            "clarity": 0,
+            "confidence": 0,
+            "fluency": 0,
+            "feedback": text
+        }
+        
+        # Try to extract scores using regex
+        clarity_match = re.search(r'clarity[:\s]+(\d+)', text, re.IGNORECASE)
+        confidence_match = re.search(r'confidence[:\s]+(\d+)', text, re.IGNORECASE)
+        fluency_match = re.search(r'fluency[:\s]+(\d+)', text, re.IGNORECASE)
+        
+        if clarity_match:
+            result["clarity"] = int(clarity_match.group(1))
+        if confidence_match:
+            result["confidence"] = int(confidence_match.group(1))
+        if fluency_match:
+            result["fluency"] = int(fluency_match.group(1))
+        
+        return result

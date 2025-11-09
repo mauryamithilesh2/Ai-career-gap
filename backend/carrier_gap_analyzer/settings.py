@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
-
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -134,7 +134,6 @@ if os.getenv("DATABASE_URL"):
         ssl_require=True
     )
 else:
-    # Fallback for development/local testing
     DB_NAME = os.getenv("DB_NAME", "carrier_gap_db")
     DB_USER = os.getenv("DB_USER", "postgres")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
@@ -152,6 +151,34 @@ else:
         "HOST": DB_HOST,
         "PORT": DB_PORT,
     }
+    
+    # Fallback for development/local testing
+    # DB_PASSWORD = os.getenv("DB_PASSWORD")
+    # USE_SQLITE = os.getenv("USE_SQLITE", "False").upper() == "TRUE"
+    
+    # if not DB_PASSWORD or USE_SQLITE or DEBUG:
+    #     # Use SQLite for development when DB_PASSWORD is not set, USE_SQLITE is True, or DEBUG is True
+    #     DATABASES["default"] = {
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR / "db.sqlite3",
+    #     }
+    # else:
+    #     # Use PostgreSQL when DB_PASSWORD is set and not using SQLite
+    #     DB_NAME = os.getenv("DB_NAME", "carrier_gap_db")
+    #     DB_USER = os.getenv("DB_USER", "postgres")
+    #     DB_HOST = os.getenv("DB_HOST", "localhost")
+    #     DB_PORT = os.getenv("DB_PORT", "5432")
+        
+    #     DATABASES["default"] = {
+    #         "ENGINE": "django.db.backends.postgresql",
+    #         "NAME": DB_NAME,
+    #         "USER": DB_USER,
+    #         "PASSWORD": DB_PASSWORD,
+    #         "HOST": DB_HOST,
+    #         "PORT": DB_PORT,
+    #     }
+
+
 
 
 # Password validation
