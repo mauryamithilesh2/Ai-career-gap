@@ -247,10 +247,10 @@ function Dashboard({ children }) {
         <footer className="bg-white border-t border-gray-200 py-4 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-600">
             <p>© {new Date().getFullYear()} CareerGap. Build with ❤️ by Mithilesh.</p>
-            <div className="flex gap-4 text-gray-500">
+            {/* <div className="flex gap-4 text-gray-500">
               <a href="#" className="hover:text-primary-500 transition">Privacy</a>
               <a href="#" className="hover:text-primary-500 transition">Terms</a>
-            </div>
+            </div> */}
           </div>
         </footer>
       </div>
