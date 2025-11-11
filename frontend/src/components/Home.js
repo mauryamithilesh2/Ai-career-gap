@@ -58,7 +58,7 @@ function Home() {
         {/* Desktop */}
         <div className="hidden sm:flex items-center space-x-4">
           <button onClick={() => navigate('/login')} className="px-4 py-2 bg-primary-100 hover:bg-primary-200 text-gray-900 font-semibold rounded-lg transition hover:shadow-lg ">Login</button>
-          <button onClick={() => navigate('/register')} className="px-4 py-2 bg-white border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg font-semibold transition hover:shadow-md">Create Account</button>
+          <button onClick={() => navigate('/register')} className="px-4 py-2 bg-white border border-primary-500 text-primary-900 hover:bg-primary-50 rounded-lg font-semibold transition hover:shadow-md">Create Account</button>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -78,9 +78,9 @@ function Home() {
       )}
 
       {/* ✅ MAIN CONTENT */}
-      <main className="flex-1 pt-16 md:pt-20 w-full mb-4 overflow-hidden">
+      <main className="flex-1 pt-12 md:pt-20 w-full mb-4 overflow-hidden">
         {/* ✅ INTERACTIVE HERO */}
-        <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-primary-50/30 via-white to-white pt-20">
+        <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-primary-50/30 via-white to-white pt-18">
           {/* Animated Background */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-20 -left-32 w-72 h-72 bg-primary-300/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float"></div>
@@ -104,8 +104,8 @@ function Home() {
                   transition={{ delay: 0.1 }}
                   className="inline-flex items-center"
                 >
-                  <span className="px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-semibold">
-                    ✨ AI-Powered Platform
+                  <span className="px-4 py-2 rounded-full bg-primary-100 text-gray-700 text-sm font-semibold">
+                   AI-Powered Platform
                   </span>
                 </motion.div>
 
@@ -117,7 +117,7 @@ function Home() {
                 >
                   <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
                     Transform Your{' '}
-                    <span className="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+                    <span className=" bg-primary-600 bg-clip-text text-transparent">
                       Career Path
                     </span>
                   </h1>
@@ -148,8 +148,8 @@ function Home() {
                       onClick={() => navigate(action.link)}
                       className={`px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 ${
                         i === 0 
-                          ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-lg' 
-                          : 'border-2 border-primary-300 text-primary-700 hover:bg-primary-50'
+                          ? 'bg-primary-200 text-gray hover:bg-primary-300 shadow-lg' 
+                          : 'border-2 border-gray-100 text-primary-50 hover:text-white bg-gray-900 hover:bg-gray-600 hover:border-primary-50'
                       }`}
                     >
                       {action.title}
@@ -158,7 +158,7 @@ function Home() {
                 </motion.div>
 
                 {/* Trust Indicators */}
-                <motion.div 
+                {/* <motion.div 
                   className="flex items-center gap-6 pt-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -172,7 +172,7 @@ function Home() {
                     </div>
                     <span className="text-sm text-gray-600"><span className="font-semibold">500+</span> users trust us</span>
                   </div>
-                </motion.div>
+                </motion.div> */}
               </motion.div>
 
               {/* Right Image */}
@@ -217,7 +217,7 @@ function Home() {
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                 Why Choose CareerGap?
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
                 Empower your career with intelligent tools designed to give you a competitive edge in your job search
               </p>
             </motion.div>
@@ -250,7 +250,7 @@ function Home() {
                   whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(155, 213, 218, 0.15)" }}
                   className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-primary-200 transition-all duration-300"
                 >
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-100 to-primary-50 flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-xl  bg-primary-200 flex items-center justify-center mb-6">
                     <span className="text-3xl">{feature.icon}</span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
@@ -343,19 +343,19 @@ function Home() {
                   step: '01',
                   title: 'Upload Your Resume',
                   description: 'Share your resume and let our AI analyze your professional profile comprehensively',
-                  icon: '📤'
+                  // icon: '📤'
                 },
                 {
                   step: '02',
                   title: 'Explore Opportunities',
                   description: 'Browse from thousands of job positions or upload specific job descriptions',
-                  icon: '🔍'
+                  // icon: '🔍'
                 },
                 {
                   step: '03',
                   title: 'Get Insights',
                   description: 'Receive detailed analysis, matching scores, and personalized improvement suggestions',
-                  icon: '✨'
+                  // icon: '✨'
                 }
               ].map((item, i) => (
                 <motion.div
@@ -369,21 +369,21 @@ function Home() {
                 >
                   {/* Connection Line */}
                   {i < 2 && (
-                    <div className="hidden md:block absolute top-20 right-0 w-full h-0.5 bg-gradient-to-r from-primary-200 to-transparent opacity-50 transform translate-x-full"></div>
+                    <div className="hidden md:block absolute top-20 right-0 w-full h-0.5  bg-primary-200 opacity-50 transform translate-x-full"></div>
                   )}
 
                   <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-primary-200 transition-all duration-300 h-full relative z-10">
                     {/* Step Number */}
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-50 mb-6">
-                      <span className="font-bold text-primary-700">{item.step}</span>
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 mb-6">
+                      <span className="font-bold text-gray-700">{item.step}</span>
                     </div>
 
                     {/* Icon */}
-                    <div className="text-4xl mb-4">{item.icon}</div>
+                    {/* <div className="text-4xl mb-4">{item.icon}</div> */}
 
                     {/* Content */}
                     <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                    <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                    <p className="text-gray-700 leading-relaxed">{item.description}</p>
                   </div>
                 </motion.div>
               ))}
@@ -404,7 +404,7 @@ function Home() {
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                 Loved by Our Users
               </h2>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-900">
                 Hear from people who've transformed their careers with CareerGap
               </p>
             </motion.div>
@@ -488,14 +488,14 @@ function Home() {
               <h2 className="text-4xl md:text-5xl font-bold text-white">
                 Ready to Transform Your Career?
               </h2>
-              <p className="text-xl text-primary-100 max-w-2xl mx-auto">
-                Join thousands of professionals who are already seeing results. Start your free analysis today.
+              <p className="text-xl text-gray-900 max-w-2xl mx-auto">
+                Many professionals who are already seeing results. Start your free analysis today.
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/register')}
-                className="inline-block px-10 py-4 bg-white text-primary-600 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="inline-block px-10 py-4 bg-white text-primary-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
               >
                 Get Started Now
               </motion.button>
