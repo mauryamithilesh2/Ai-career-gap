@@ -8,6 +8,12 @@ const API = axios.create({
     timeout: 10000,
 });
 
+export const PublicAPI = axios.create({
+    baseURL: `${API_BASE_URL}/api/`,
+    timeout: 10000,
+});
+
+
 // Request interceptor to add JWT token
 API.interceptors.request.use(
     (config) => {
@@ -76,6 +82,29 @@ export const dashboardAPI = {
     getStats: () => API.get('dashboard/stats/'),
 };
 
+// ✅ Public Stats API (won't crash on 401)
+export const publicDashboardAPI = {
+    getStats: async () => {
+        try {
+            return await PublicAPI.get('dashboard/stats/');
+        } catch (e) {
+            // fallback default stats for Home page
+            return {
+                data: {
+                    total_resumes: 0,
+                    total_jobs: 0,
+                    total_analyses: 0,
+                    match_accuracy: 0,
+                    avg_analysis_time: 0,
+                }
+            };
+        }
+    }
+};
+
+
+
+
 // Resume API endpoints
 export const resumeAPI = {
     upload: (formData) => API.post('resumes/', formData, {
@@ -119,6 +148,7 @@ export const speakAPI = {
     timeout: 60000 // Increase timeout for audio processing
   }),
 };
+
 
 
 export default API;

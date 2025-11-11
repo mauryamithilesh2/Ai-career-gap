@@ -13,6 +13,7 @@ import GoogleCallback from './components/GoogleCallback';
 import ResumeGenerator from './components/ResumeGenerator';
 import SpeakAssessment from './components/SpeakAssessment';
 import './App.css';
+import Home from './components/Home';
 
 
 
@@ -60,7 +61,8 @@ function App() {
     return(
       <Routes>
         {/* this is pub;lic route open for all */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

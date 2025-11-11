@@ -137,10 +137,10 @@ function ResumeGenerator() {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                <span className="text-3xl">👤</span>
+          <div className="space-y-4">
+            <div className="text-center mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-full mb-2">
+                <span className="text-2xl">👤</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Personal Information</h2>
               <p className="text-gray-600">Let's start with your basic details</p>
@@ -157,7 +157,7 @@ function ResumeGenerator() {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g., John Doe"
+                  placeholder="e.g., Mithilesh "
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
                     formErrors.name ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -177,7 +177,7 @@ function ResumeGenerator() {
                   type="text"
                   value={formData.role}
                   onChange={handleChange}
-                  placeholder="e.g., Frontend Developer, Data Scientist"
+                  placeholder="e.g., Full Stack developer / software developer"
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
                     formErrors.role ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -193,10 +193,10 @@ function ResumeGenerator() {
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                <span className="text-3xl">💼</span>
+          <div className="space-y-4">
+            <div className="text-center mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-full mb-2">
+                <span className="text-2xl">💼</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional Details</h2>
               <p className="text-gray-600">Tell us about your education and skills</p>
@@ -213,7 +213,7 @@ function ResumeGenerator() {
                   value={formData.education}
                   onChange={handleChange}
                   rows={3}
-                  placeholder="e.g., Bachelor of Science in Computer Science, University Name, 2020-2024"
+                  placeholder="e.g., Bachelor of Technology, Institute Name, 2022-2026"
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${
                     formErrors.education ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -234,7 +234,7 @@ function ResumeGenerator() {
                   value={formData.skills}
                   onChange={handleChange}
                   rows={4}
-                  placeholder="e.g., JavaScript, React, Python, Node.js, SQL, Git, Docker"
+                  placeholder="e.g., JavaScript, React, Python, react.js, SQL, Git, Docker"
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${
                     formErrors.skills ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -250,16 +250,16 @@ function ResumeGenerator() {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                <span className="text-3xl">🎯</span>
+          <div className="space-y-4">
+            <div className="text-center mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-full mb-2">
+                <span className="text-2xl">🎯</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Experience & Achievements</h2>
               <p className="text-gray-600">Showcase your projects and accomplishments</p>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
                 <label htmlFor="projects" className="block text-sm font-semibold text-gray-700 mb-2">
                   Projects
@@ -286,7 +286,7 @@ function ResumeGenerator() {
                   value={formData.internship}
                   onChange={handleChange}
                   rows={3}
-                  placeholder="e.g., Software Engineering Intern at Tech Company, Summer 2023"
+                  placeholder="e.g., Software Engineering Intern at Tech Company, Summer 2025"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
                 />
                 <p className="mt-2 text-xs text-gray-500">💡 Optional: Describe your work experience or internships</p>
@@ -313,9 +313,9 @@ function ResumeGenerator() {
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+          <div className="space-y-4">
+            <div className="text-center mb-5">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-full mb-2">
                 <span className="text-3xl">✨</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Review & Generate</h2>
@@ -449,10 +449,10 @@ function ResumeGenerator() {
 
   return (
     <Dashboard>
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-5">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+        <div className="mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             AI Resume Generator
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
@@ -461,7 +461,7 @@ function ResumeGenerator() {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        <div className="mb-5">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
               <React.Fragment key={step.id}>

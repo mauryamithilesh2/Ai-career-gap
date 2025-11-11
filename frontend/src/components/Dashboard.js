@@ -111,11 +111,11 @@ function Dashboard({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:transform-none ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <aside className={`${
+        sidebarOpen ? 'block' : 'hidden'
+      } lg:block fixed lg:static inset-y-0 left-0 top-16 lg:top-0 z-50 w-64 bg-white border-r border-gray-200 h-[calc(100vh-64px)] lg:h-screen overflow-y-auto transition-all duration-300`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -191,19 +191,31 @@ function Dashboard({ children }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-6">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded p-1"
-            aria-label="Open sidebar"
-            aria-expanded={sidebarOpen}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+        <header className="bg-white border-b border-gray-200 shadow-sm h-16 flex items-center justify-between px-4 sm:px-6 z-40 hover:border-primary-300">
+          <div className="flex items-center space-x-3">
+            {/* Logo - Visible on mobile */}
+            <div className="lg:hidden flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-lg font-bold text-gray-900">CareerGap</span>
+            </div>
+            {/* Menu Toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 shadow-sm hover:shadow-md focus:ring-primary-500 focus:ring-offset-2 rounded p-1"
+              aria-label="Open sidebar"
+              aria-expanded={sidebarOpen}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
           <div className="flex-1" />
           <div className="flex items-center space-x-4">
             <button 
@@ -231,7 +243,19 @@ function Dashboard({ children }) {
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
           {children}
         </main>
+        {/* Footer - Compact Version for Dashboard */}
+        <footer className="bg-white border-t border-gray-200 py-4 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-600">
+            <p>© {new Date().getFullYear()} CareerGap. Build with ❤️ by Mithilesh.</p>
+            <div className="flex gap-4 text-gray-500">
+              <a href="#" className="hover:text-primary-500 transition">Privacy</a>
+              <a href="#" className="hover:text-primary-500 transition">Terms</a>
+            </div>
+          </div>
+        </footer>
       </div>
+
+      
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
@@ -239,8 +263,11 @@ function Dashboard({ children }) {
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
+
+        
       )}
     </div>
+    
   );
 }
 
