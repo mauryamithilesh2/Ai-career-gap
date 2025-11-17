@@ -124,7 +124,7 @@ WSGI_APPLICATION = "carrier_gap_analyzer.wsgi.application"
 
 # Initialize DATABASES dictionary
 DATABASES = {}
-
+# ok for neon db---
 # Production database configuration
 import dj_database_url
 if os.getenv("DATABASE_URL"):
